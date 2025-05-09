@@ -1,0 +1,2334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calculadora de Descansos entre Jornadas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+  <style>
+    :root {
+      /* Variables CSS centralizadas para mayor coherencia */
+      --color-primary: #0078d4;
+      --color-primary-dark: #005a9e;
+      --color-primary-light: #e8f4fd;
+      --color-morning: #3498db;
+      --color-afternoon: #e74c3c;
+      --color-double: #9b59b6;
+      --color-success: #27ae60;
+      --color-warning: #e74c3c;
+      --color-text: #333;
+      --color-text-light: #666;
+      --color-background: #fff;
+      --color-background-alt: #f8f9fa;
+      --color-border: #dee2e6;
+      --shadow: 0 2px 10px rgba(0,0,0,0.1);
+      --radius: 8px;
+      --transition: all 0.3s ease;
+      /* Estilos para turnos sugeridos */
+      --bg-sugerido: #fffbea;
+      --border-sugerido: #f0c674;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+      color: var(--color-text);
+      line-height: 1.6;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--color-background);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    
+    header {
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
+      color: white;
+      padding: 25px;
+      text-align: center;
+    }
+    
+    h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+    
+    .subheader {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    /* Pestañas */
+    .tabs {
+      display: flex;
+      background-color: var(--color-background-alt);
+      border-bottom: 1px solid var(--color-border);
+    }
+    
+    .tab {
+      padding: 15px 25px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: var(--transition);
+      border-bottom: 2px solid transparent;
+    }
+    
+    .tab.active {
+      border-bottom: 2px solid var(--color-primary);
+      color: var(--color-primary);
+    }
+    
+    .tab:hover { 
+      background-color: #e9ecef; 
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 25px;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Secuencia de turnos */
+    .turnos-container {
+      margin-bottom: 30px;
+    }
+    
+    .turnos-titulo {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .turnos-titulo h2 {
+      font-size: 18px;
+      color: var(--color-primary);
+    }
+    
+    .turnos-control {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .btn-primary {
+      background-color: var(--color-primary);
+      color: white;
+    }
+    
+    .btn-secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+    
+    .btn-success {
+      background-color: var(--color-success);
+      color: white;
+    }
+    
+    .btn:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+    
+    .turno-sequence,
+    .calendar-view {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 15px;
+      background-color: var(--color-background-alt);
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+    }
+    
+    .turno-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      position: relative;
+    }
+    
+    .turno-delete {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 18px;
+      height: 18px;
+      background-color: var(--color-warning);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      cursor: pointer;
+      z-index: 5;
+    }
+    
+    .turno-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      transition: var(--transition);
+    }
+    
+    .turno-circle:hover { 
+      transform: scale(1.1); 
+    }
+    
+    .turno-m { background-color: var(--color-morning); }
+    .turno-t { background-color: var(--color-afternoon); }
+    .turno-dd { background-color: var(--color-double); }
+    .turno-fs { background-color: var(--color-success); }
+    
+    /* Turnos sugeridos */
+    .sugerido {
+      background-color: var(--bg-sugerido);
+      border: 2px dashed var(--border-sugerido);
+      padding: 5px;
+      border-radius: var(--radius);
+    }
+    
+    /* Flechas */
+    .arrow {
+      color: #aaa;
+      font-size: 20px;
+    }
+    
+    .sugerido-arrow {
+      color: var(--border-sugerido);
+      font-weight: bold;
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #fffdf0;
+      padding: 5px 10px;
+      border-radius: var(--radius);
+      border: 2px dashed var(--border-sugerido);
+      margin: 0 5px;
+    }
+    
+    /* Indicadores de descanso */
+    .descanso-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 80px;
+    }
+    
+    .descanso-hours { 
+      font-weight: bold; 
+    }
+    
+    .descanso-deficit { 
+      color: var(--color-warning); 
+      font-size: 12px; 
+    }
+    
+    .descanso-ok { 
+      color: var(--color-success); 
+      font-size: 12px; 
+    }
+    
+    /* Resultados y recomendaciones */
+    .results-container {
+      background-color: var(--color-background);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 30px;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .results-title {
+      font-size: 18px;
+      color: var(--color-primary);
+    }
+    
+    .pattern-box {
+      padding: 15px;
+      border-radius: var(--radius);
+      margin-bottom: 15px;
+      border-left: 4px solid;
+    }
+    
+    .pattern-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .pattern-simple { background-color: var(--color-background-alt); border-left-color: var(--color-morning); }
+    .pattern-double { background-color: #fff5f5; border-left-color: var(--color-afternoon); }
+    .pattern-triple { background-color: #ffefef; border-left-color: var(--color-double); }
+    .pattern-alternated { background-color: #f0fff4; border-left-color: var(--color-success); }
+    
+    .deficit-summary {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+    }
+    
+    .deficit-box {
+      flex: 1;
+      padding: 15px;
+      background-color: var(--color-background-alt);
+      border-radius: var(--radius);
+      text-align: center;
+      margin: 0 10px;
+      transition: transform 0.3s ease;
+    }
+    
+    .deficit-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .deficit-number {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .deficit-label {
+      font-size: 14px;
+      color: var(--color-text-light);
+    }
+    
+    /* Recomendaciones */
+    .recommendation-box {
+      background-color: var(--color-primary-light);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 4px solid var(--color-primary);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    
+    .recommendation-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--color-primary);
+      margin-bottom: 10px;
+    }
+    
+    .compensation-options {
+      margin-top: 15px;
+    }
+    
+    .compensation-option {
+      background-color: white;
+      border-radius: var(--radius);
+      padding: 15px;
+      margin-bottom: 10px;
+      border: 1px solid #eee;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .compensation-option:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    
+    .compensation-option.selected {
+      border: 2px solid var(--color-success);
+      background-color: #f0fff4;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(39,174,96,0.2);
+    }
+    
+    .option-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .option-description {
+      font-size: 14px;
+      color: var(--color-text-light);
+    }
+    
+    /* Calendario Adaptado */
+    .calendar-container {
+      margin-top: 30px;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .calendar-title {
+      font-size: 18px;
+      color: var(--color-primary);
+    }
+    
+    .calendar-actions {
+      display: flex;
+      gap: 10px;
+    }
+    
+    /* Tooltip */
+    .info-tooltip {
+      position: relative;
+      display: inline-block;
+      margin-left: 5px;
+      font-size: 14px;
+      color: var(--color-primary);
+    }
+    
+    .info-tooltip .tooltip-text {
+      visibility: hidden;
+      width: 220px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 8px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -110px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 12px;
+      font-weight: normal;
+    }
+    
+    .info-tooltip .tooltip-text::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #333 transparent transparent transparent;
+    }
+    
+    .info-tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    /* Modal */
+    #turnoModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    #turnoModal > div {
+      background-color: white;
+      padding: 25px;
+      border-radius: 12px;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+    
+    /* Mensaje de error/info */
+    #info-messages {
+      margin-bottom: 15px;
+    }
+    
+    .message {
+      padding: 10px 15px;
+      border-radius: var(--radius);
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    
+    .message-info {
+      background-color: #e3f2fd;
+      border-left: 4px solid var(--color-primary);
+    }
+    
+    .message-error {
+      background-color: #ffebee;
+      border-left: 4px solid var(--color-warning);
+    }
+    
+    .message-success {
+      background-color: #e8f5e9;
+      border-left: 4px solid var(--color-success);
+    }
+    
+    /* Media queries mejorados */
+    @media print {
+      body { background: white; }
+      .container { box-shadow: none; max-width: 100%; }
+      .tabs, .turnos-control, .btn, .add-turno-circle, .turno-delete { 
+        display: none !important; 
+      }
+      header { 
+        background: white !important; 
+        color: black !important; 
+        padding: 15px; 
+      }
+      .tab-content { 
+        display: block !important; 
+        padding: 10px;
+      }
+      .turno-sequence, .calendar-view {
+        page-break-inside: avoid;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .container { 
+        margin: 0; 
+        border-radius: 0;
+      }
+      .turnos-titulo { 
+        flex-direction: column; 
+        align-items: flex-start; 
+        gap: 10px; 
+      }
+      .turnos-control { 
+        width: 100%; 
+        justify-content: space-between; 
+      }
+      .deficit-summary { 
+        flex-direction: column; 
+        gap: 10px; 
+      }
+      .deficit-box { 
+        margin: 0 0 10px 0; 
+      }
+      #turnoModal > div {
+        width: 90%;
+        padding: 15px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      .turno-sequence, .calendar-view {
+        padding: 10px 5px;
+      }
+      .btn {
+        padding: 6px 12px;
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Calculadora de Descansos entre Jornadas</h1>
+      <div class="subheader">Sistema avanzado de análisis y compensación de descansos en turnos sanitarios</div>
+    </header>
+
+    <!-- Pestañas (sólo Calculadora) -->
+    <div class="tabs">
+      <div class="tab active" data-tab="calculadora">Calculadora</div>
+    </div>
+
+    <!-- CALCULADORA -->
+    <div class="tab-content active" id="calculadora">
+      <div id="info-messages"></div>
+      <div class="turnos-container">
+        <div class="turnos-titulo">
+          <h2>Secuencia de Turnos 
+            <span class="info-tooltip">
+              <i class="fas fa-info-circle"></i>
+              <span class="tooltip-text">Añade los turnos en orden cronológico para analizar el descanso entre ellos</span>
+            </span>
+          </h2>
+          <div class="turnos-control">
+            <button class="btn btn-primary" id="add-turno">
+              <i class="fas fa-plus"></i> Añadir Turno
+            </button>
+            <button class="btn btn-secondary" id="clear-turnos">
+              <i class="fas fa-trash"></i> Limpiar
+            </button>
+          </div>
+        </div>
+        <div class="turno-sequence" id="turno-sequence">
+          <!-- Turnos se agregan dinámicamente -->
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div class="results-container" id="results" style="display: none;">
+        <div class="results-header">
+          <div class="results-title">Análisis de Descansos</div>
+        </div>
+        <div class="pattern-box pattern-double" id="pattern-box">
+          <div class="pattern-title">
+            <i class="fas fa-exclamation-triangle"></i> <strong>Patrón Detectado:</strong> <span id="pattern-name">Doble Déficit</span>
+          </div>
+          <p id="pattern-description"></p>
+        </div>
+        <div class="deficit-summary">
+          <div class="deficit-box">
+            <div class="deficit-number" id="deficit-total">0:00</div>
+            <div class="deficit-label"><strong>Déficit Total</strong></div>
+          </div>
+          <div class="deficit-box">
+            <div class="deficit-number" id="compensacion-requerida">0:00</div>
+            <div class="deficit-label"><strong>Compensación Requerida</strong></div>
+          </div>
+          <div class="deficit-box">
+            <div class="deficit-number" id="transiciones-deficitarias">0</div>
+            <div class="deficit-label"><strong>Transiciones Deficitarias</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recomendaciones -->
+      <div class="recommendation-box" id="recommendations" style="display: none;">
+        <div class="recommendation-title">
+          <i class="fas fa-lightbulb"></i> Recomendaciones de Compensación
+        </div>
+        <p id="recommendation-text"></p>
+        <div class="compensation-options" id="compensation-options">
+          <!-- Opciones de compensación generadas dinámicamente -->
+        </div>
+      </div>
+
+      <!-- Calendario Adaptado -->
+      <div class="calendar-container" id="calendar" style="display: none;">
+        <div class="calendar-header">
+          <div class="calendar-title">Horario Adaptado con Compensación</div>
+        </div>
+        <div class="calendar-view" id="calendar-view">
+          <!-- Se muestra la secuencia original + recomendación o mensaje -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para seleccionar turno -->
+  <div id="turnoModal">
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0; font-size: 20px; color: var(--color-primary);">Seleccionar Turno</h3>
+        <div onclick="closeModal()" style="cursor: pointer; font-size: 18px; color: #6c757d;">
+          <i class="fas fa-times"></i>
+        </div>
+      </div>
+      <div style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
+        <div onclick="addTurnoType('M')" data-tipo="M" style="flex: 1; padding: 20px 15px; text-align: center; background-color: var(--color-morning); color: white; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 8px rgba(52,152,219,0.3); min-width: 80px;">
+          <div style="font-size: 28px; margin-bottom: 6px; font-weight: bold;">M</div>
+          <div style="font-weight: 500; margin-bottom: 3px;">Mañana</div>
+          <div style="font-size: 11px; opacity: 0.8;">7:30-14:45</div>
+        </div>
+        <div onclick="addTurnoType('T')" data-tipo="T" style="flex: 1; padding: 20px 15px; text-align: center; background-color: var(--color-afternoon); color: white; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 8px rgba(231,76,60,0.3); min-width: 80px;">
+          <div style="font-size: 28px; margin-bottom: 6px; font-weight: bold;">T</div>
+          <div style="font-weight: 500; margin-bottom: 3px;">Tarde</div>
+          <div style="font-size: 11px; opacity: 0.8;">14:30-21:45</div>
+        </div>
+        <div onclick="addTurnoType('DD')" data-tipo="DD" style="flex: 1; padding: 20px 15px; text-align: center; background-color: var(--color-double); color: white; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 8px rgba(155,89,182,0.3); min-width: 80px;">
+          <div style="font-size: 28px; margin-bottom: 6px; font-weight: bold;">DD</div>
+          <div style="font-weight: 500; margin-bottom: 3px;">Doblaje</div>
+          <div style="font-size: 11px; opacity: 0.8;">7:30-21:45</div>
+        </div>
+        <div onclick="addTurnoType('FS')" data-tipo="FS" style="flex: 1; padding: 20px 15px; text-align: center; background-color: var(--color-success); color: white; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 8px rgba(39,174,96,0.3); min-width: 80px;">
+          <div style="font-size: 28px; margin-bottom: 6px; font-weight: bold;">FS</div>
+          <div style="font-weight: 500; margin-bottom: 3px;">Día Libre</div>
+          <div style="font-size: 11px; opacity: 0.8;">24h</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    /* ======== VARIABLES DE ESTADO ======== */
+    let turnos = [];
+    let currentDeficitMinutes = 0;
+    let deficitsDetallados = [];
+    let ultimoAnalisis = null; // Para almacenar el último análisis completo y evitar recálculos
+    
+    // Referencias a elementos DOM (centralizadas para mejor mantenimiento)
+    const elementos = {
+      turnoSequence: document.getElementById('turno-sequence'),
+      turnoModal: document.getElementById('turnoModal'),
+      resultsSection: document.getElementById('results'),
+      recommendationsSection: document.getElementById('recommendations'),
+      calendarSection: document.getElementById('calendar'),
+      calendarView: document.getElementById('calendar-view'),
+      infoMessages: document.getElementById('info-messages'),
+      btnAddTurno: document.getElementById('add-turno'),
+      btnClearTurnos: document.getElementById('clear-turnos'),
+      deficitTotal: document.getElementById('deficit-total'),
+      compensacionRequerida: document.getElementById('compensacion-requerida'),
+      transicionesDeficitarias: document.getElementById('transiciones-deficitarias'),
+      patternBox: document.getElementById('pattern-box'),
+      patternName: document.getElementById('pattern-name'),
+      patternDescription: document.getElementById('pattern-description'),
+      recommendationText: document.getElementById('recommendation-text'),
+      compensationOptions: document.getElementById('compensation-options')
+    };
+
+    /* ======== CONFIGURACIÓN FIJA ======== */
+    const config = {
+      // Tiempos en minutos
+      descansoReglamentario: 12 * 60, // 12 horas en minutos
+      descansoMinimo: 7 * 60,         // 7 horas en minutos (mínimo legal)
+      diasCompensacion: 3,            // Días máximos para compensar déficit
+      minutosDia: 24 * 60,            // Minutos en un día (para cálculos)
+      
+      // Horarios de turnos (formato 24h)
+      horarios: {
+        'M': { 
+          inicio: '07:30', 
+          fin: '14:45',
+          duracion: 7 * 60 + 15   // 7h15m en minutos
+        },
+        'T': { 
+          inicio: '14:30', 
+          fin: '21:45',
+          duracion: 7 * 60 + 15   // 7h15m en minutos
+        },
+        'DD': { 
+          inicio: '07:30', 
+          fin: '21:45',
+          duracion: 14 * 60 + 15  // 14h15m en minutos
+        },
+        'FS': {
+          inicio: '00:00',
+          fin: '23:59',
+          duracion: 24 * 60       // 24h en minutos (día completo)
+        }
+      },
+      
+      // Mensajes de error/info
+      mensajes: {
+        errorGenerico: "Ha ocurrido un error. Por favor, inténtalo de nuevo.",
+        limpieza: "Se ha limpiado la secuencia de turnos.",
+        sinDeficit: "No hay déficit en la secuencia actual.",
+        deficitDetectado: "Se ha detectado déficit en la secuencia de turnos.",
+        transicionInvalida: "Atención: La transición entre estos turnos no es habitual en la práctica."
+      }
+    };
+
+    /* ======== FUNCIONES DE UTILIDAD Y FORMATEO ======== */
+    /**
+     * Convierte una duración en minutos a formato "horas:minutos"
+     * @param {number} minutos - Minutos a formatear
+     * @returns {string} Tiempo formateado (hh:mm)
+     */
+    function formatDuration(minutos) {
+      if (isNaN(minutos)) return "0:00";
+      
+      const isNegative = minutos < 0;
+      const absMinutos = Math.abs(minutos);
+      const hours = Math.floor(absMinutos / 60);
+      const minutes = Math.round(absMinutos % 60);
+      
+      return (isNegative ? "-" : "") + 
+             hours + ":" + 
+             (minutes < 10 ? "0" : "") + minutes;
+    }
+
+    /**
+     * Convierte un string de tiempo (HH:MM) a minutos
+     * @param {string} timeStr - Hora en formato HH:MM
+     * @returns {number} Tiempo en minutos
+     */
+    function convertToMinutes(timeStr) {
+      if (!timeStr || typeof timeStr !== 'string') return 0;
+      
+      try {
+        const [h, m] = timeStr.split(':').map(num => parseInt(num, 10));
+        
+        if (isNaN(h) || isNaN(m)) return 0;
+        
+        return h * 60 + m;
+      } catch (error) {
+        console.error("Error al convertir tiempo a minutos:", error);
+        return 0;
+      }
+    }
+
+    /**
+ * Muestra un mensaje informativo al usuario
+ * @param {string} mensaje - Texto del mensaje
+ * @param {string} tipo - Tipo de mensaje (info, error, success)
+ * @param {number} duracion - Duración en ms (0 para no auto-cerrar)
+ */
+function mostrarMensaje(mensaje, tipo = 'info', duracion = 5000) {
+  return; // Función desactivada - no muestra ningún mensaje
+}
+
+    /**
+     * Comprueba si una secuencia de turnos es válida y segura
+     * @param {array} secuencia - Array de turnos a validar
+     * @returns {object} Resultado de la validación {valido, mensaje}
+     */
+    function validarSecuenciaTurnos(secuencia) {
+      if (!secuencia || !Array.isArray(secuencia) || secuencia.length < 2) {
+        return { valido: true, mensaje: "" }; // No hay suficientes turnos para validar
+      }
+      
+      // Validar transiciones peligrosas (DD seguido de M)
+      for (let i = 0; i < secuencia.length - 1; i++) {
+        if (secuencia[i] === 'DD' && secuencia[i+1] === 'M') {
+          return { 
+            valido: false, 
+            mensaje: "Atención: La transición de Doblaje (DD) a Mañana (M) puede ser peligrosa por el escaso descanso." 
+          };
+        }
+      }
+      
+      // Más validaciones podrían añadirse aquí
+      
+      return { valido: true, mensaje: "" };
+    }
+
+    /**
+     * Calcula el tiempo de descanso entre dos turnos en minutos
+     * @param {string} turnoActual - Tipo del turno actual
+     * @param {string} turnoSiguiente - Tipo del turno siguiente
+     * @returns {number} Minutos de descanso entre turnos
+     */
+    function calcularDescansoEnMinutos(turnoActual, turnoSiguiente) {
+      // Si alguno es día libre, no hay déficit
+      if (turnoActual === 'FS' || turnoSiguiente === 'FS') {
+        return config.minutosDia; // Retornamos el equivalente a un día completo
+      }
+      
+      const finActual = convertToMinutes(config.horarios[turnoActual].fin);
+      const inicioSiguiente = convertToMinutes(config.horarios[turnoSiguiente].inicio);
+      
+      // Si el inicio del siguiente es antes que el fin del actual, añadimos un día
+      let minutos = (inicioSiguiente < finActual)
+        ? (inicioSiguiente + config.minutosDia - finActual)
+        : (inicioSiguiente - finActual);
+        
+      return minutos;
+    }
+
+    /**
+     * Calcula el tiempo de descanso entre dos turnos en formato HH:MM
+     * @param {string} turnoActual - Tipo del turno actual
+     * @param {string} turnoSiguiente - Tipo del turno siguiente
+     * @returns {string} Tiempo de descanso formateado
+     */
+    function calcularDescanso(turnoActual, turnoSiguiente) {
+      const minutos = calcularDescansoEnMinutos(turnoActual, turnoSiguiente);
+      return formatDuration(minutos);
+    }
+
+    /* ======== GESTIÓN DE PESTAÑAS ======== */
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Desactivar todas las pestañas
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        
+        // Activar pestaña seleccionada
+        this.classList.add('active');
+        
+        // Desactivar todos los contenidos de pestañas
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        // Activar contenido relacionado con la pestaña
+        const tabId = this.getAttribute('data-tab');
+        const targetContent = document.getElementById(tabId);
+        
+        if (targetContent) {
+          targetContent.classList.add('active');
+        } else {
+          console.error(`Contenido de pestaña no encontrado: ${tabId}`);
+        }
+      });
+    });
+
+    /* ======== INICIALIZACIÓN DE BOTONES ======== */
+    // Asignación de eventos con manejo de errores
+    try {
+      // Añadir turno
+      elementos.btnAddTurno.addEventListener('click', () => {
+        try {
+          showModal();
+        } catch (error) {
+          console.error("Error al mostrar modal:", error);
+          mostrarMensaje("No se pudo mostrar el selector de turnos", "error");
+        }
+      });
+      
+      // Limpiar turnos
+      elementos.btnClearTurnos.addEventListener('click', () => {
+        try {
+          turnos = [];
+          deficitsDetallados = [];
+          ultimoAnalisis = null;
+          elementos.turnoSequence.innerHTML = '';
+          hideResults();
+          mostrarMensaje("Se ha limpiado la secuencia de turnos", "info");
+        } catch (error) {
+          console.error("Error al limpiar turnos:", error);
+          mostrarMensaje("No se pudieron limpiar los turnos", "error");
+        }
+      });
+    } catch (error) {
+      console.error("Error en la inicialización de botones:", error);
+    }
+  </script>
+  <script>
+    /* ======== AÑADIR Y ELIMINAR TURNOS ======== */
+    /**
+     * Añade un nuevo turno a la secuencia
+     * @param {string} tipo - Tipo de turno (M, T, DD, FS)
+     */
+    function addTurnoType(tipo) {
+      try {
+        // Validar el tipo de turno
+        if (!['M', 'T', 'DD', 'FS'].includes(tipo)) {
+          throw new Error(`Tipo de turno no válido: ${tipo}`);
+        }
+        
+        // Añadir a la secuencia
+        turnos.push(tipo);
+        
+        // Cerrar modal y actualizar vista
+        closeModal();
+        renderTurnos();
+        
+        // Si hay suficientes turnos, analizar la secuencia
+        if (turnos.length > 1) {
+          // Validar la secuencia antes de analizar
+          const validacion = validarSecuenciaTurnos(turnos);
+          if (!validacion.valido) {
+            mostrarMensaje(validacion.mensaje, "error", 0);
+          }
+          analyzeSequence();
+        } else {
+          hideResults();
+        }
+      } catch (error) {
+        console.error("Error al añadir turno:", error);
+        closeModal();
+        mostrarMensaje("Error al añadir turno. Por favor, inténtalo de nuevo.", "error");
+        
+        // Asegurar que la interfaz esté actualizada
+        renderTurnos();
+      }
+    }
+
+    /**
+     * Elimina un turno de la secuencia
+     * @param {number} index - Índice del turno a eliminar
+     */
+    function removeTurno(index) {
+      try {
+        // Validar índice
+        if (index < 0 || index >= turnos.length) {
+          throw new Error(`Índice fuera de rango: ${index}`);
+        }
+        
+        // Eliminar de la secuencia
+        turnos.splice(index, 1);
+        
+        // Actualizar vista y análisis
+        renderTurnos();
+        
+        // Limpiar análisis anterior
+        ultimoAnalisis = null;
+        
+        if (turnos.length > 1) {
+          analyzeSequence();
+        } else {
+          hideResults();
+          mostrarMensaje("Se necesitan al menos dos turnos para calcular descansos.", "info");
+        }
+      } catch (error) {
+        console.error("Error al eliminar turno:", error);
+        mostrarMensaje("No se pudo eliminar el turno.", "error");
+        
+        // Intentar recuperar un estado válido
+        renderTurnos();
+      }
+    }
+
+    /* ======== RENDERIZAR LA SECUENCIA DE TURNOS ======== */
+    /**
+     * Renderiza la secuencia de turnos en la interfaz
+     */
+    function renderTurnos() {
+      try {
+        // Limpiar contenedor
+        elementos.turnoSequence.innerHTML = '';
+        
+        // Si no hay turnos, mostrar mensaje
+        if (turnos.length === 0) {
+          const emptyMessage = document.createElement('div');
+          emptyMessage.textContent = 'Añade turnos para comenzar el análisis';
+          emptyMessage.style.color = 'var(--color-text-light)';
+          emptyMessage.style.fontStyle = 'italic';
+          emptyMessage.style.padding = '10px';
+          elementos.turnoSequence.appendChild(emptyMessage);
+        }
+        
+        // Renderizar cada turno
+        turnos.forEach((turno, index) => {
+          // Crear contenedor de turno
+          const turnoItem = document.createElement('div');
+          turnoItem.className = 'turno-item';
+
+          // Botón eliminar (si hay más de un turno)
+          if (turnos.length > 1) {
+            const deleteBtn = document.createElement('div');
+            deleteBtn.className = 'turno-delete';
+            deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+            deleteBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              removeTurno(index);
+            });
+            turnoItem.appendChild(deleteBtn);
+          }
+
+          // Círculo del turno
+          const turnoCircle = document.createElement('div');
+          turnoCircle.className = 'turno-circle turno-' + (turno === 'FS' ? 'fs' : turno.toLowerCase());
+          turnoCircle.textContent = turno;
+          turnoItem.appendChild(turnoCircle);
+
+          // Etiqueta de horario o "Libre"
+          if (turno !== 'FS') {
+            const horarioLabel = document.createElement('div');
+            horarioLabel.style.fontSize = '10px';
+            horarioLabel.style.color = '#666';
+            horarioLabel.textContent = `${config.horarios[turno].inicio}-${config.horarios[turno].fin}`;
+            turnoItem.appendChild(horarioLabel);
+          } else {
+            const fsLabel = document.createElement('div');
+            fsLabel.style.fontSize = '10px';
+            fsLabel.style.color = '#666';
+            fsLabel.textContent = 'Libre';
+            turnoItem.appendChild(fsLabel);
+          }
+          
+          // Añadir al contenedor
+          elementos.turnoSequence.appendChild(turnoItem);
+
+          // Flechas e indicadores de descanso entre turnos
+          if (index < turnos.length - 1) {
+            // Flecha de conexión
+            const arrow = document.createElement('div');
+            arrow.className = 'arrow';
+            arrow.innerHTML = '<i class="fas fa-long-arrow-alt-right"></i>';
+            elementos.turnoSequence.appendChild(arrow);
+
+            // Calculamos descanso solo entre turnos de trabajo (no FS)
+            if (turnos[index] !== 'FS' && turnos[index+1] !== 'FS') {
+              // Crear indicador de descanso
+              const descansoIndicator = document.createElement('div');
+              descansoIndicator.className = 'descanso-indicator';
+              
+              // Mostrar horas de descanso
+              const descansoHours = document.createElement('div');
+              descansoHours.className = 'descanso-hours';
+              const horasDescanso = calcularDescanso(turnos[index], turnos[index+1]);
+              descansoHours.textContent = horasDescanso;
+              descansoIndicator.appendChild(descansoHours);
+
+              // Comprobar si hay déficit
+              const descansoMinutos = calcularDescansoEnMinutos(turnos[index], turnos[index+1]);
+              if (descansoMinutos < config.descansoReglamentario) {
+                // Mostrar déficit
+                const deficit = document.createElement('div');
+                deficit.className = 'descanso-deficit';
+                const deficitHoras = formatDuration((config.descansoReglamentario - descansoMinutos));
+                deficit.innerHTML = `<strong>Déficit: ${deficitHoras}</strong>`;
+                descansoIndicator.appendChild(deficit);
+                
+                // Comprobar si es crítico (menos del mínimo legal)
+                if (descansoMinutos < config.descansoMinimo) {
+                  deficit.style.fontWeight = 'bold';
+                  deficit.style.fontSize = '12px';
+                  deficit.innerHTML += ' <i class="fas fa-exclamation-triangle"></i>';
+                }
+              } else {
+                // Cumple reglamentario
+                const ok = document.createElement('div');
+                ok.className = 'descanso-ok';
+                ok.innerHTML = '<strong>Cumple reglamentario</strong>';
+                descansoIndicator.appendChild(ok);
+              }
+              
+              // Añadir al contenedor
+              elementos.turnoSequence.appendChild(descansoIndicator);
+
+              // Segunda flecha
+              const arrow2 = document.createElement('div');
+              arrow2.className = 'arrow';
+              arrow2.innerHTML = '<i class="fas fa-long-arrow-alt-right"></i>';
+              elementos.turnoSequence.appendChild(arrow2);
+            }
+          }
+        });
+
+        // Botón extra para añadir turno
+        const addTurnoBtn = document.createElement('div');
+        addTurnoBtn.className = 'turno-item';
+        const addTurnoCircle = document.createElement('div');
+        addTurnoCircle.className = 'turno-circle';
+        addTurnoCircle.style.backgroundColor = '#ddd';
+        addTurnoCircle.style.color = '#333';
+        addTurnoCircle.textContent = '+';
+        addTurnoCircle.style.fontSize = '24px';
+        addTurnoCircle.style.cursor = 'pointer';
+        addTurnoCircle.addEventListener('click', showModal);
+        addTurnoBtn.appendChild(addTurnoCircle);
+
+        const addLabel = document.createElement('div');
+        addLabel.style.fontSize = '10px';
+        addLabel.style.color = '#666';
+        addLabel.textContent = 'Añadir';
+        addTurnoBtn.appendChild(addLabel);
+
+        elementos.turnoSequence.appendChild(addTurnoBtn);
+      } catch (error) {
+        console.error("Error al renderizar turnos:", error);
+        mostrarMensaje("Error al mostrar la secuencia de turnos", "error");
+        
+        // Intentar limpiar la vista en caso de error
+        try {
+          elementos.turnoSequence.innerHTML = '<div style="color: red;">Error al mostrar turnos. Por favor, recarga la página.</div>';
+        } catch (e) {
+          console.error("Error crítico al recuperar de error:", e);
+        }
+      }
+    }
+
+    /* ======== DETECTAR Y COMPENSAR DÉFICITS ======== */
+    /**
+     * Calcula el déficit con posible compensación en una secuencia de turnos
+ * @param {array} schedule - Secuencia de turnos a analizar
+ * @returns {object} Resultado con déficits y déficit neto
+ */
+function calcularDeficitConCompensacion(schedule) {
+  try {
+    // Validar entrada
+    if (!schedule || !Array.isArray(schedule) || schedule.length < 2) {
+      return { deficits: [], netDeficit: 0 };
+    }
+    
+    // 1. Recoger déficits y excesos de descanso
+    const deficits = [];
+    const excesos = [];
+    
+    for (let i = 0; i < schedule.length - 1; i++) {
+      // Saltar si alguno es día libre
+      if (schedule[i] === 'FS' || schedule[i+1] === 'FS') continue;
+      
+      // Calcular descanso entre turnos
+      const descanso = calcularDescansoEnMinutos(schedule[i], schedule[i+1]);
+      
+      // Registrar déficit si existe
+      if (descanso < config.descansoReglamentario) {
+        deficits.push({
+          indice: i,
+          turnoActual: schedule[i],
+          turnoSiguiente: schedule[i+1],
+          descansoActual: descanso,
+          deficit: config.descansoReglamentario - descanso,
+          deficitCritico: descanso < config.descansoMinimo,
+          compensado: false
+        });
+      } 
+      // Registrar exceso si existe (para posibles compensaciones)
+      else if (descanso > config.descansoReglamentario) {
+        excesos.push({
+          indice: i,
+          exceso: descanso - config.descansoReglamentario
+        });
+      }
+    }
+
+    // 2. Usar los excesos para compensar déficits previos
+    for (let d = 0; d < deficits.length; d++) {
+      const def = deficits[d];
+      
+      // Buscar excesos posteriores que puedan compensar este déficit
+      for (let e = 0; e < excesos.length; e++) {
+        const exc = excesos[e];
+        
+        // Solo usar excesos que ocurren después del déficit
+        if (exc.indice > def.indice) {
+          // Calcular cuánto del exceso podemos usar para la compensación
+          const compensacionPosible = Math.min(def.deficit, exc.exceso);
+          
+          if (compensacionPosible > 0) {
+            // Aplicar compensación
+            def.deficit -= compensacionPosible;
+            def.compensacionAplicada = (def.compensacionAplicada || 0) + compensacionPosible;
+            
+            // Reducir el exceso disponible
+            exc.exceso -= compensacionPosible;
+            
+            // Si el déficit quedó completamente compensado, marcar y salir
+            if (def.deficit <= 0) {
+              def.deficit = 0;
+              def.compensado = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    // 3. Para los déficits que aún no estén compensados, intentar con períodos que incluyan FS
+    for (let d = 0; d < deficits.length; d++) {
+      const def = deficits[d];
+      
+      // Si ya está compensado, saltar
+      if (def.compensado) continue;
+      
+      const idx = def.indice;
+      
+      // Buscar períodos de descanso extendidos con FS
+      for (let j = idx + 1; j < schedule.length - 1; j++) {
+        if (schedule[j] === 'FS' && j + 1 < schedule.length) {
+          // Calcular descanso extendido desde el final del turno con déficit 
+          // hasta el inicio del turno después del FS
+          const inicioSiguiente = j + 1 < schedule.length ? schedule[j+1] : null;
+          
+          if (inicioSiguiente) {
+            // Calcular el tiempo total desde el fin del turno deficitario hasta el inicio del turno post-FS
+            const finTurnoDeficit = config.horarios[schedule[idx]].fin;
+            const inicioTurnoPostFS = config.horarios[inicioSiguiente].inicio;
+            
+            // Calcular minutos totales (considerando si cruza medianoche)
+            let minutosFin = convertToMinutes(finTurnoDeficit);
+            let minutosInicio = convertToMinutes(inicioTurnoPostFS);
+            
+            // Si el inicio es antes que el fin, añadir días completos según la posición
+            const diasEntre = j - idx;
+            let minutosDescanso = 0;
+            
+            if (minutosInicio < minutosFin) {
+              minutosDescanso = minutosInicio + (config.minutosDia * diasEntre) - minutosFin;
+            } else {
+              minutosDescanso = minutosInicio + (config.minutosDia * (diasEntre - 1)) - minutosFin;
+            }
+            
+            // Calcular exceso sobre el reglamentario
+            const exceso = minutosDescanso - config.descansoReglamentario;
+            
+            if (exceso > 0) {
+              // Aplicar compensación
+              const compensacion = Math.min(def.deficit, exceso);
+              def.deficit -= compensacion;
+              def.compensacionAplicada = (def.compensacionAplicada || 0) + compensacion;
+              
+              if (def.deficit <= 0) {
+                def.deficit = 0;
+                def.compensado = true;
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Calcular déficit neto total (solo de los no compensados)
+    const deficitsFiltrados = deficits.filter(d => d.deficit > 0);
+    const netDeficit = deficitsFiltrados.reduce((sum, d) => sum + d.deficit, 0);
+    
+    return { 
+      deficits: deficitsFiltrados, 
+      deficitsOriginales: deficits, // Guardar todos para referencia
+      netDeficit 
+    };
+  } catch (error) {
+    console.error("Error al calcular déficit con compensación:", error);
+    return { deficits: [], netDeficit: 0, error: true };
+  }
+}
+
+    /* ======== ANÁLISIS GENERAL DE LA SECUENCIA ======== */
+    /**
+     * Analiza la secuencia completa de turnos y actualiza la UI
+     */
+    function analyzeSequence() {
+      try {
+        // Si no hay suficientes turnos, no hacer nada
+        if (turnos.length < 2) {
+          hideResults();
+          return;
+        }
+        
+        // Usar análisis en caché si existe y la secuencia no ha cambiado
+        if (ultimoAnalisis && ultimoAnalisis.turnos.length === turnos.length && 
+            JSON.stringify(ultimoAnalisis.turnos) === JSON.stringify(turnos)) {
+          updateResults(ultimoAnalisis.deficits, ultimoAnalisis.netDeficit);
+          
+          // Mostrar u ocultar recomendaciones según haya déficit
+          if (ultimoAnalisis.netDeficit > 0) {
+            elementos.resultsSection.style.display = 'block';
+            elementos.recommendationsSection.style.display = 'block';
+            updateRecommendations(turnos[turnos.length - 1], ultimoAnalisis.netDeficit);
+            elementos.calendarSection.style.display = 'block';
+          } else {
+            elementos.resultsSection.style.display = 'block';
+            elementos.recommendationsSection.style.display = 'none';
+            elementos.calendarSection.style.display = 'block';
+            elementos.calendarView.innerHTML = '<div style="color: var(--color-success); font-weight: bold;">No hace falta compensación.</div>';
+          }
+          
+          return;
+        }
+        
+        // Realizar un nuevo análisis
+        const resultado = calcularDeficitConCompensacion(turnos);
+        
+        // Guardar resultados para uso futuro
+        deficitsDetallados = resultado.deficits;
+        currentDeficitMinutes = resultado.netDeficit;
+        
+        // Guardar análisis completo en caché
+        ultimoAnalisis = {
+          turnos: [...turnos],
+          deficits: resultado.deficits,
+          deficitsOriginales: resultado.deficitsOriginales,
+          netDeficit: resultado.netDeficit
+        };
+        
+        // Actualizar UI
+        updateResults(resultado.deficits, resultado.netDeficit);
+
+        // Mostrar u ocultar recomendaciones
+        if (resultado.netDeficit > 0) {
+          elementos.resultsSection.style.display = 'block';
+          elementos.recommendationsSection.style.display = 'block';
+          updateRecommendations(turnos[turnos.length - 1], resultado.netDeficit);
+          elementos.calendarSection.style.display = 'block';
+          
+          // Mostrar mensaje si hay déficit crítico (menos del mínimo legal)
+          const deficitCritico = resultado.deficits.some(d => d.deficitCritico);
+          if (deficitCritico) {
+            mostrarMensaje("Atención: Hay transiciones con descanso inferior al mínimo legal de 7 horas.", "error", 0);
+          }
+        } else {
+          elementos.resultsSection.style.display = 'block';
+          elementos.recommendationsSection.style.display = 'none';
+          elementos.calendarSection.style.display = 'block';
+          elementos.calendarView.innerHTML = '<div style="color: var(--color-success); font-weight: bold; padding: 10px;">No hace falta compensación.</div>';
+        }
+      } catch (error) {
+        console.error("Error al analizar secuencia:", error);
+        mostrarMensaje("Error al analizar la secuencia de turnos", "error");
+        
+        // Intentar mostrar resultados parciales o un mensaje de error
+        elementos.resultsSection.style.display = 'none';
+        elementos.recommendationsSection.style.display = 'none';
+        elementos.calendarSection.style.display = 'none';
+      }
+    }
+
+    /**
+     * Detecta patrones en los déficits
+     * @param {array} deficits - Lista de déficits detectados
+     * @returns {object} Tipo y descripción del patrón
+     */
+    function detectPattern(deficits) {
+      try {
+        // Si no hay déficits, devolver "sin déficit"
+        const numDeficits = deficits.length;
+        if (numDeficits === 0) {
+          return { 
+            type: 'none', 
+            description: 'Sin déficit',
+            icon: 'fa-check-circle',
+            color: 'var(--color-success)'
+          };
+        }
+        
+        // Déficit simple (un solo déficit)
+        if (numDeficits === 1) {
+          const deficitCritico = deficits[0].deficitCritico;
+          return {
+            type: 'simple',
+            description: deficitCritico ? 'Déficit Simple Crítico' : 'Déficit Simple',
+            details: `Existe una única transición con descanso inferior al reglamentario de 12h.${
+              deficitCritico ? ' El descanso es inferior al mínimo legal de 7h.' : ''
+            }`,
+            icon: deficitCritico ? 'fa-exclamation-circle' : 'fa-info-circle',
+            color: deficitCritico ? 'var(--color-warning)' : 'var(--color-morning)'
+          };
+        }
+        
+        // Buscar déficits consecutivos
+        let maxConsecutivos = 1, consecutivosActuales = 1;
+        let hayDeficitCritico = false;
+        
+        for (let i = 1; i < deficits.length; i++) {
+          if (deficits[i-1].indice + 1 === deficits[i].indice) {
+            consecutivosActuales++;
+          } else {
+            consecutivosActuales = 1;
+          }
+          maxConsecutivos = Math.max(maxConsecutivos, consecutivosActuales);
+          
+          // Comprobar si hay déficit crítico
+          if (deficits[i].deficitCritico) {
+            hayDeficitCritico = true;
+          }
+        }
+        
+        // Triple déficit o más
+        if (maxConsecutivos >= 3) {
+          return {
+            type: 'triple',
+            description: hayDeficitCritico ? 'Triple Déficit Crítico' : 'Triple Déficit',
+            details: `Se acumulan ${maxConsecutivos} transiciones consecutivas deficitarias.${
+              hayDeficitCritico ? ' Al menos una tiene descanso inferior al mínimo legal de 7h.' : ''
+            }`,
+            icon: 'fa-radiation',
+            color: 'var(--color-double)'
+          };
+        }
+        
+        // Doble déficit
+        if (maxConsecutivos === 2) {
+          return {
+            type: 'double',
+            description: hayDeficitCritico ? 'Doble Déficit Crítico' : 'Doble Déficit',
+            details: `Existe un doble déficit consecutivo que incrementa la fatiga acumulada.${
+              hayDeficitCritico ? ' Al menos una transición tiene descanso inferior al mínimo legal de 7h.' : ''
+            }`,
+            icon: 'fa-exclamation-triangle',
+            color: 'var(--color-afternoon)'
+          };
+        }
+        
+        // Déficits alternados (no consecutivos)
+        return {
+          type: 'alternated',
+          description: hayDeficitCritico ? 'Déficits Alternados Críticos' : 'Déficits Alternados',
+          details: `Existen ${numDeficits} déficits separados por transiciones que sí cumplen con el descanso reglamentario.${
+            hayDeficitCritico ? ' Al menos una transición tiene descanso inferior al mínimo legal de 7h.' : ''
+          }`,
+          icon: 'fa-exchange-alt',
+          color: 'var(--color-success)'
+        };
+      } catch (error) {
+        console.error("Error al detectar patrón:", error);
+        return { 
+          type: 'error', 
+          description: 'Error al analizar', 
+          details: 'No se pudo determinar el patrón específico.',
+          icon: 'fa-exclamation-circle',
+          color: 'var(--color-warning)'
+        };
+      }
+    }
+
+    /**
+     * Actualiza la interfaz de resultados
+     * @param {array} deficits - Lista de déficits detectados
+     * @param {number} netDeficit - Déficit neto total en minutos
+     */
+    function updateResults(deficits, netDeficit) {
+      try {
+        const pattern = detectPattern(deficits);
+        updatePatternUI(pattern, netDeficit, deficits.length);
+      } catch (error) {
+        console.error("Error al actualizar resultados:", error);
+        mostrarMensaje("Error al mostrar resultados", "error");
+      }
+    }
+  </script>
+  <script>
+    /* ======== MOSTRAR PATRÓN Y COMPENSACIÓN ======== */
+    /**
+     * Actualiza la interfaz con la información del patrón detectado
+     * @param {object} pattern - Patrón detectado
+     * @param {number} netDeficit - Déficit neto total en minutos
+     * @param {number} numDeficits - Número de déficits
+     */
+    function updatePatternUI(pattern, netDeficit, numDeficits) {
+      try {
+        // Obtener referencias
+        const patternBox = elementos.patternBox;
+        const patternTitle = patternBox.querySelector('.pattern-title');
+        const patternNameSpan = elementos.patternName;
+        const patternDescription = elementos.patternDescription;
+
+        // Resetear clases
+        patternBox.className = 'pattern-box';
+        
+        // Actualizar según patrón
+        switch(pattern.type) {
+          case 'none':
+            patternBox.classList.add('pattern-simple');
+            patternTitle.innerHTML = `<i class="fas ${pattern.icon}"></i> <strong>Sin déficits</strong>`;
+            patternNameSpan.textContent = 'Sin déficits';
+            patternDescription.textContent = `Todas las transiciones cumplen el descanso mínimo reglamentario de ${formatDuration(config.descansoReglamentario)} horas.`;
+            break;
+          case 'simple':
+            patternBox.classList.add('pattern-simple');
+            patternTitle.innerHTML = `<i class="fas ${pattern.icon}"></i> <strong>Patrón Detectado:</strong> <span id="pattern-name">${pattern.description}</span>`;
+            patternNameSpan.textContent = pattern.description;
+            patternDescription.innerHTML = `${pattern.details}<br>Déficit neto: ${formatDuration(netDeficit)} horas.`;
+            break;
+          case 'double':
+            patternBox.classList.add('pattern-double');
+            patternTitle.innerHTML = `<i class="fas ${pattern.icon}"></i> <strong>Patrón Detectado:</strong> <span id="pattern-name">${pattern.description}</span>`;
+            patternNameSpan.textContent = pattern.description;
+            patternDescription.innerHTML = `${pattern.details}<br>Déficit neto: ${formatDuration(netDeficit)} horas.`;
+            break;
+          case 'triple':
+            patternBox.classList.add('pattern-triple');
+            patternTitle.innerHTML = `<i class="fas ${pattern.icon}"></i> <strong>Patrón Detectado:</strong> <span id="pattern-name">${pattern.description}</span>`;
+            patternNameSpan.textContent = pattern.description;
+            patternDescription.innerHTML = `${pattern.details}<br>Déficit neto: ${formatDuration(netDeficit)} horas.`;
+            break;
+          case 'alternated':
+            patternBox.classList.add('pattern-alternated');
+            patternTitle.innerHTML = `<i class="fas ${pattern.icon}"></i> <strong>Patrón Detectado:</strong> <span id="pattern-name">${pattern.description}</span>`;
+            patternNameSpan.textContent = pattern.description;
+            patternDescription.innerHTML = `${pattern.details}<br>Déficit neto total: ${formatDuration(netDeficit)} horas en ${numDeficits} transiciones.`;
+            break;
+          default:
+            patternBox.classList.add('pattern-double');
+            patternTitle.innerHTML = `<i class="fas fa-exclamation-circle"></i> <strong>Análisis:</strong>`;
+            patternNameSpan.textContent = "Análisis de déficit";
+            patternDescription.innerHTML = `Se ha detectado un déficit total de ${formatDuration(netDeficit)} horas.`;
+        }
+        
+        // Actualizar números de resumen
+        const deficitTotalElement = elementos.deficitTotal;
+        const compensacionElement = elementos.compensacionRequerida;
+        const transicionesElement = elementos.transicionesDeficitarias;
+        
+        // Calcular la compensación necesaria (déficit + descanso reglamentario para el siguiente turno)
+        const finalCompensacion = netDeficit > 0 ? netDeficit : 0;
+
+        // Actualizar elementos de la interfaz
+        if (netDeficit === 0) {
+          deficitTotalElement.textContent = '0:00';
+          deficitTotalElement.style.color = 'var(--color-success)';
+          compensacionElement.textContent = '0:00';
+          compensacionElement.style.color = 'var(--color-success)';
+        } else {
+          deficitTotalElement.textContent = formatDuration(netDeficit);
+          deficitTotalElement.style.color = netDeficit >= config.descansoMinimo ? 'var(--color-warning)' : 'var(--color-warning)';
+          compensacionElement.textContent = formatDuration(finalCompensacion);
+          compensacionElement.style.color = 'var(--color-text)';
+        }
+        
+        transicionesElement.textContent = numDeficits;
+        transicionesElement.style.color = numDeficits > 0 ? 'var(--color-text)' : 'var(--color-success)';
+      } catch (error) {
+        console.error("Error al actualizar interfaz de patrón:", error);
+        
+        // Intentar mostrar un mensaje básico en caso de error
+        try {
+          elementos.patternBox.innerHTML = `<div style="color: var(--color-warning);">Error al mostrar el patrón. Déficit total: ${formatDuration(netDeficit)}</div>`;
+        } catch (e) {
+          console.error("Error crítico al recuperar de error:", e);
+        }
+      }
+    }
+
+    /* ======== RECOMENDACIONES ======== */
+    /**
+     * Actualiza las recomendaciones basadas en el último turno y déficit
+     * @param {string} lastTurno - Último turno de la secuencia
+     * @param {number} deficitMinutes - Déficit total en minutos
+     */
+     function updateRecommendations(lastTurno, deficitMinutes) {
+  try {
+    const optionsContainer = elementos.compensationOptions;
+    const recText = elementos.recommendationText;
+    
+    // Limpiar contenedor
+    optionsContainer.innerHTML = '';
+    
+    // Si no hay déficit, no mostrar opciones
+    if (deficitMinutes === 0) {
+      recText.innerHTML = "No se requieren compensaciones ya que no hay déficit de descanso.";
+      return;
+    }
+    
+    // Texto de recomendación
+    recText.innerHTML = `<p>Se ha detectado un déficit de descanso de <strong>${formatDuration(deficitMinutes)}</strong> horas. 
+                       A continuación se presentan opciones para compensar este déficit mediante la programación
+                       de los siguientes turnos.</p>`;
+    
+    // Generar opciones según el último turno
+    let options = [];
+    
+    // Cálculo básico para turnos simples
+    const recupManiana = calcularDescansoEnMinutos(lastTurno, 'M') - config.descansoReglamentario;
+    const recupTarde = calcularDescansoEnMinutos(lastTurno, 'T') - config.descansoReglamentario;
+    
+    // Cálculo mejorado para turnos con FS (día libre)
+    // Esto calcula el tiempo real desde el fin del último turno hasta el inicio del siguiente
+    const finUltimoTurno = convertToMinutes(config.horarios[lastTurno].fin);
+    const inicioTurnoM = convertToMinutes(config.horarios['M'].inicio);
+    const inicioTurnoT = convertToMinutes(config.horarios['T'].inicio);
+    
+    // Calcular tiempo total incluyendo un día completo en medio
+    let recupFSM;
+    if (inicioTurnoM > finUltimoTurno) {
+      // Sin cruce de medianoche
+      recupFSM = (config.minutosDia + inicioTurnoM - finUltimoTurno) - config.descansoReglamentario;
+    } else {
+      // Con cruce de medianoche
+      recupFSM = (2 * config.minutosDia + inicioTurnoM - finUltimoTurno) - config.descansoReglamentario;
+    }
+    
+    let recupFST;
+    if (inicioTurnoT > finUltimoTurno) {
+      // Sin cruce de medianoche
+      recupFST = (config.minutosDia + inicioTurnoT - finUltimoTurno) - config.descansoReglamentario;
+    } else {
+      // Con cruce de medianoche
+      recupFST = (2 * config.minutosDia + inicioTurnoT - finUltimoTurno) - config.descansoReglamentario;
+    }
+    
+    // Agregar opción de Mañana si proporciona recuperación positiva
+    if (recupManiana > 0) {
+      options.push({ 
+        title: "Mañana", 
+        turns: ["M"], 
+        recovery: formatDuration(recupManiana), 
+        recoveryMinutes: recupManiana,
+        description: "Turno Mañana para recuperar descanso.",
+        adecuado: recupManiana >= deficitMinutes
+      });
+    }
+    
+    // Agregar opción de Tarde si proporciona recuperación positiva
+    if (recupTarde > 0) {
+      options.push({ 
+        title: "Tarde", 
+        turns: ["T"], 
+        recovery: formatDuration(recupTarde),
+        recoveryMinutes: recupTarde,
+        description: "Turno Tarde para recuperar descanso.",
+        adecuado: recupTarde >= deficitMinutes
+      });
+    }
+    
+    // Agregar opciones con día libre
+    options.push({ 
+      title: "FS + M", 
+      turns: ["FS", "M"], 
+      recovery: formatDuration(recupFSM),
+      recoveryMinutes: recupFSM,
+      description: "Día libre + Mañana.",
+      adecuado: recupFSM >= deficitMinutes
+    });
+    
+    options.push({ 
+      title: "FS + T", 
+      turns: ["FS", "T"], 
+      recovery: formatDuration(recupFST),
+      recoveryMinutes: recupFST,
+      description: "Día libre + Tarde.",
+      adecuado: recupFST >= deficitMinutes
+    });
+    
+    // Filtrar opciones que no proporcionan recuperación
+    options = options.filter(opt => opt.recoveryMinutes > 0);
+    
+    // Ordenar opciones por tiempo de recuperación (de menos a más)
+    options.sort((a, b) => a.recoveryMinutes - b.recoveryMinutes);
+    
+    // Crear opciones en la interfaz
+    options.forEach((opt, idx) => {
+      addCompensationOption(opt, idx === 0);
+    });
+    
+    // Actualizar calendario con la opción seleccionada
+    updateAdaptedSchedule();
+  } catch (error) {
+    console.error("Error al actualizar recomendaciones:", error);
+    try {
+      elementos.recommendationText.innerHTML = '<div style="color: var(--color-warning);">No se pudieron generar recomendaciones. Por favor, inténtalo de nuevo.</div>';
+      elementos.compensationOptions.innerHTML = '';
+    } catch (e) {
+      console.error("Error crítico al recuperar de error:", e);
+    }
+  }
+}
+
+    /**
+     * Añade una opción de compensación a la interfaz
+     * @param {object} option - Datos de la opción
+     * @param {boolean} selected - Si está seleccionada inicialmente
+     */
+    function addCompensationOption(option, selected = false) {
+      try {
+        const optionsContainer = elementos.compensationOptions;
+        
+        // Crear elemento de opción
+        const optionElement = document.createElement('div');
+        optionElement.className = 'compensation-option' + (selected ? ' selected' : '');
+        optionElement.dataset.turns = JSON.stringify(option.turns);
+        optionElement.dataset.recovery = option.recovery;
+        optionElement.dataset.adecuado = option.adecuado;
+
+        // Título con iconos de turnos
+        const optionTitle = document.createElement('div');
+        optionTitle.className = 'option-title';
+        let titleHtml = '';
+        
+        // Añadir círculos de turnos
+        option.turns.forEach(turn => {
+          const turnoClass = turn === 'FS' ? 'turno-fs' : 'turno-' + turn.toLowerCase();
+          titleHtml += `<span class="turno-circle ${turnoClass}" style="width: 25px; height: 25px; font-size: 12px;">${turn}</span> `;
+        });
+        
+        titleHtml += option.title;
+        optionTitle.innerHTML = titleHtml;
+        
+        // Añadir icono de seleccionado si es el caso
+        if (selected) {
+          const icon = document.createElement('i');
+          icon.className = 'fas fa-check-circle';
+          icon.style.color = 'var(--color-success)';
+          optionTitle.appendChild(icon);
+        }
+        
+        // Descripción y recuperación
+        const optionDesc = document.createElement('div');
+        optionDesc.className = 'option-description';
+        
+        // Indicar si la recuperación es adecuada
+        const adecuadoText = option.adecuado 
+          ? `<span style="color: var(--color-success);"><i class="fas fa-check-circle"></i> Suficiente para compensar el déficit</span>` 
+          : `<span style="color: var(--color-warning);"><i class="fas fa-exclamation-circle"></i> No compensa totalmente el déficit</span>`;
+          
+        optionDesc.innerHTML = `${option.description}<br><strong>Recuperación: ${option.recovery}h</strong><br>${adecuadoText}`;
+        
+        // Añadir elementos al contenedor
+        optionElement.appendChild(optionTitle);
+        optionElement.appendChild(optionDesc);
+
+        // Añadir evento de clic
+        optionElement.addEventListener('click', function() {
+          // Desmarcar todas las opciones
+          document.querySelectorAll('.compensation-option').forEach(o => {
+            o.classList.remove('selected');
+            const checkIcon = o.querySelector('.fa-check-circle');
+            if (checkIcon) checkIcon.remove();
+          });
+          
+          // Marcar esta opción
+          this.classList.add('selected');
+          
+          // Añadir icono de seleccionado
+          const icon = document.createElement('i');
+          icon.className = 'fas fa-check-circle';
+          icon.style.color = 'var(--color-success)';
+          this.querySelector('.option-title').appendChild(icon);
+          
+          // Actualizar calendario
+          updateAdaptedSchedule();
+        });
+        
+        // Añadir al contenedor principal
+        optionsContainer.appendChild(optionElement);
+      } catch (error) {
+        console.error("Error al añadir opción de compensación:", error);
+      }
+    }
+
+    /* ======== HORARIO ADAPTADO ======== */
+    /**
+     * Actualiza el horario adaptado con la opción seleccionada
+     */
+    function updateAdaptedSchedule() {
+      try {
+        const selectedOption = document.querySelector('.compensation-option.selected');
+        if (!selectedOption) {
+          elementos.calendarView.innerHTML = '<div style="color: var(--color-text-light); padding: 10px;">Selecciona una opción de compensación para ver el horario adaptado.</div>';
+          return;
+        }
+        
+        // Obtener datos de la opción seleccionada
+        const turnsData = selectedOption.dataset.turns;
+        const recovery = selectedOption.dataset.recovery;
+        const esAdecuado = selectedOption.dataset.adecuado === 'true';
+        
+        // Validar datos
+        if (!turnsData) {
+          throw new Error('No se encontraron datos de turnos en la opción seleccionada');
+        }
+        
+        // Parsear turnos recomendados
+        const turnsRecomendados = JSON.parse(turnsData);
+        if (!Array.isArray(turnsRecomendados)) {
+          throw new Error('Los datos de turnos no son un array válido');
+        }
+        
+        // Crear nuevo horario con los turnos originales y recomendados
+        const newSchedule = [...turnos, ...turnsRecomendados];
+        
+        // Renderizar el horario adaptado
+        renderAdaptedSchedule(newSchedule, turnos.length, recovery, esAdecuado);
+      } catch (error) {
+        console.error('Error al actualizar horario adaptado:', error);
+        mostrarMensaje('Error al generar horario adaptado', 'error');
+        
+        // Mostrar mensaje de error en la sección
+        elementos.calendarView.innerHTML = `
+          <div style="color: var(--color-warning); padding: 10px;">
+            <i class="fas fa-exclamation-triangle"></i> 
+            No se pudo generar el horario adaptado. Por favor, inténtalo de nuevo.
+          </div>`;
+      }
+    }
+
+    /**
+     * Renderiza el horario adaptado con compensación
+     * @param {array} schedule - Secuencia completa de turnos
+     * @param {number} originalCount - Cantidad de turnos originales
+     * @param {string} recoveryTime - Tiempo de recuperación (formato HH:MM)
+     * @param {boolean} esAdecuado - Si la compensación es adecuada
+     */
+    function renderAdaptedSchedule(schedule, originalCount, recoveryTime, esAdecuado) {
+      try {
+        // Limpiar contenedor
+        elementos.calendarView.innerHTML = '';
+        
+        // Validar datos
+        if (!Array.isArray(schedule) || schedule.length === 0) {
+          const errorMsg = document.createElement('div');
+          errorMsg.textContent = 'No hay suficientes datos para mostrar el horario adaptado.';
+          errorMsg.style.color = 'var(--color-warning)';
+          elementos.calendarView.appendChild(errorMsg);
+          return;
+        }
+
+        // Detectar déficits en este nuevo schedule
+        const { deficits, netDeficit } = calcularDeficitConCompensacion(schedule);
+        
+        // Mensaje de estado de compensación
+        const estadoCompensacion = document.createElement('div');
+        estadoCompensacion.style.marginBottom = '15px';
+        estadoCompensacion.style.padding = '10px';
+        estadoCompensacion.style.borderRadius = 'var(--radius)';
+        
+        if (netDeficit === 0) {
+          estadoCompensacion.style.backgroundColor = '#e8f5e9';
+          estadoCompensacion.style.color = 'var(--color-success)';
+          estadoCompensacion.style.borderLeft = '4px solid var(--color-success)';
+          estadoCompensacion.innerHTML = `
+            <i class="fas fa-check-circle"></i> 
+            <strong>Compensación completa:</strong> Con esta opción se recupera todo el déficit de descanso.
+          `;
+        } else if (esAdecuado) {
+          estadoCompensacion.style.backgroundColor = '#fff8e1';
+          estadoCompensacion.style.color = '#ff9800';
+          estadoCompensacion.style.borderLeft = '4px solid #ff9800';
+          estadoCompensacion.innerHTML = `
+            <i class="fas fa-info-circle"></i> 
+            <strong>Compensación teórica:</strong> El tiempo recuperado es suficiente, pero aún queda un déficit técnico de ${formatDuration(netDeficit)}.
+          `;
+        } else {
+          estadoCompensacion.style.backgroundColor = '#ffebee';
+          estadoCompensacion.style.color = 'var(--color-warning)';
+          estadoCompensacion.style.borderLeft = '4px solid var(--color-warning)';
+          estadoCompensacion.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i> 
+            <strong>Compensación parcial:</strong> Esta opción no recupera todo el déficit. Quedan ${formatDuration(netDeficit)} por compensar.
+          `;
+        }
+        
+        elementos.calendarView.appendChild(estadoCompensacion);
+
+        // Contenedor para la secuencia
+        const secuenciaContainer = document.createElement('div');
+        secuenciaContainer.style.display = 'flex';
+        secuenciaContainer.style.flexWrap = 'wrap';
+        secuenciaContainer.style.gap = '10px';
+        secuenciaContainer.style.alignItems = 'center';
+        secuenciaContainer.style.backgroundColor = 'var(--color-background-alt)';
+        secuenciaContainer.style.borderRadius = 'var(--radius)';
+        secuenciaContainer.style.padding = '15px';
+        
+        // Indicador de separación mostrado
+        let separadorMostrado = false;
+        
+        // Dibujamos la secuencia adaptada
+        schedule.forEach((turno, index) => {
+          // Añadir separador entre secuencia original y recomendación
+          if (index === originalCount && !separadorMostrado) {
+            const sep = document.createElement('div');
+            sep.className = 'sugerido-arrow';
+            sep.innerHTML = `<i class="fas fa-arrow-right"></i>
+                            <span>Compensación seleccionada</span>
+                            <span>(Recupera ${recoveryTime}h)</span>`;
+            secuenciaContainer.appendChild(sep);
+            separadorMostrado = true;
+          }
+
+          // Crear elemento de turno
+          const turnoItem = document.createElement('div');
+          turnoItem.className = 'turno-item';
+          
+          // Añadir clase y estilos para turnos sugeridos
+          if (index >= originalCount) {
+            turnoItem.classList.add('sugerido');
+            turnoItem.style.transform = 'scale(1.1)';
+            turnoItem.style.position = 'relative';
+            
+            // Indicador de recomendado
+            const recomendadoIndicator = document.createElement('div');
+            recomendadoIndicator.style.position = 'absolute';
+            recomendadoIndicator.style.top = '-10px';
+            recomendadoIndicator.style.right = '-5px';
+            recomendadoIndicator.style.background = 'var(--border-sugerido)';
+            recomendadoIndicator.style.color = '#333';
+            recomendadoIndicator.style.borderRadius = '50%';
+            recomendadoIndicator.style.width = '18px';
+            recomendadoIndicator.style.height = '18px';
+            recomendadoIndicator.style.display = 'flex';
+            recomendadoIndicator.style.alignItems = 'center';
+            recomendadoIndicator.style.justifyContent = 'center';
+            recomendadoIndicator.style.fontSize = '10px';
+            recomendadoIndicator.style.zIndex = '5';
+            recomendadoIndicator.innerHTML = '<i class="fas fa-check"></i>';
+            turnoItem.appendChild(recomendadoIndicator);
+          }
+
+          // Círculo del turno
+          const turnoCircle = document.createElement('div');
+          turnoCircle.className = 'turno-circle turno-' + (turno === 'FS' ? 'fs' : turno.toLowerCase());
+          turnoCircle.textContent = turno;
+          turnoItem.appendChild(turnoCircle);
+
+          // Etiqueta de horario o "Libre"
+          if (turno !== 'FS') {
+            const horarioLabel = document.createElement('div');
+            horarioLabel.style.fontSize = '10px';
+            horarioLabel.style.color = '#666';
+            horarioLabel.textContent = `${config.horarios[turno].inicio}-${config.horarios[turno].fin}`;
+            turnoItem.appendChild(horarioLabel);
+          } else {
+            const fsLabel = document.createElement('div');
+            fsLabel.style.fontSize = '10px';
+            fsLabel.style.color = '#666';
+            fsLabel.textContent = 'Libre';
+            turnoItem.appendChild(fsLabel);
+          }
+          
+          // Añadir a la secuencia
+          secuenciaContainer.appendChild(turnoItem);
+
+          // Añadir flechas e indicadores entre turnos
+          if (index < schedule.length - 1) {
+            // Flecha
+            const arrow = document.createElement('div');
+            arrow.className = 'arrow';
+            arrow.innerHTML = '<i class="fas fa-long-arrow-alt-right"></i>';
+            secuenciaContainer.appendChild(arrow);
+
+            // Indicador de descanso (solo entre turnos de trabajo)
+            if (schedule[index] !== 'FS' && schedule[index+1] !== 'FS') {
+              // Crear indicador
+              const descansoIndicator = document.createElement('div');
+              descansoIndicator.className = 'descanso-indicator';
+              
+              // Mostrar horas de descanso
+              const descansoHours = document.createElement('div');
+              descansoHours.className = 'descanso-hours';
+              const horasDescanso = calcularDescanso(schedule[index], schedule[index+1]);
+              descansoHours.textContent = horasDescanso;
+              descansoIndicator.appendChild(descansoHours);
+
+              // Comprobar déficit
+              const descansoMinutos = calcularDescansoEnMinutos(schedule[index], schedule[index+1]);
+              if (descansoMinutos < config.descansoReglamentario) {
+                // Mostrar déficit
+                const deficit = document.createElement('div');
+                deficit.className = 'descanso-deficit';
+                deficit.textContent = `Déficit: ${formatDuration(config.descansoReglamentario - descansoMinutos)}`;
+                
+                // Destacar si es crítico
+                if (descansoMinutos < config.descansoMinimo) {
+                  deficit.style.fontWeight = 'bold';
+                  deficit.innerHTML += ' <i class="fas fa-exclamation-triangle"></i>';
+                }
+                
+                descansoIndicator.appendChild(deficit);
+              } else {
+                // Cumple reglamentario
+                const ok = document.createElement('div');
+                ok.className = 'descanso-ok';
+                ok.innerHTML = '<strong>Cumple reglamentario</strong>';
+                descansoIndicator.appendChild(ok);
+              }
+              
+              // Añadir a la secuencia
+              secuenciaContainer.appendChild(descansoIndicator);
+
+              // Segunda flecha
+              const arrow2 = document.createElement('div');
+              arrow2.className = 'arrow';
+              arrow2.innerHTML = '<i class="fas fa-long-arrow-alt-right"></i>';
+              secuenciaContainer.appendChild(arrow2);
+            }
+          }
+        });
+        
+        // Añadir secuencia al contenedor
+        elementos.calendarView.appendChild(secuenciaContainer);
+        
+        // Mostrar sección
+        elementos.calendarSection.style.display = 'block';
+      } catch (error) {
+        console.error("Error al renderizar horario adaptado:", error);
+        
+        // Mostrar mensaje de error
+        elementos.calendarView.innerHTML = `
+          <div style="color: var(--color-warning); padding: 10px;">
+            <i class="fas fa-exclamation-triangle"></i> 
+            Error al generar el horario adaptado: ${error.message}
+          </div>`;
+      }
+    }
+
+    /* ======== MOSTRAR/OCULTAR RESULTADOS ======== */
+    /**
+     * Oculta todas las secciones de resultados
+     */
+    function hideResults() {
+      try {
+        elementos.resultsSection.style.display = 'none';
+        elementos.recommendationsSection.style.display = 'none';
+        elementos.calendarSection.style.display = 'none';
+        
+        // Limpiar datos de resultados
+        ultimoAnalisis = null;
+        deficitsDetallados = [];
+        currentDeficitMinutes = 0;
+      } catch (error) {
+        console.error("Error al ocultar resultados:", error);
+      }
+    }
+  </script>
+  <script>
+    /* ======== MODAL ======== */
+    /**
+     * Muestra el modal para seleccionar turnos con animación
+     */
+    function showModal() {
+      try {
+        // Mostrar modal con animación
+        elementos.turnoModal.style.display = 'flex';
+        
+        // Animar el contenido
+        const modalContent = elementos.turnoModal.querySelector('div');
+        if (modalContent) {
+          modalContent.style.opacity = '0';
+          modalContent.style.transform = 'translateY(20px)';
+          
+          // Aplicar animación con pequeño retraso para mejor efecto
+          setTimeout(() => {
+            modalContent.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            modalContent.style.opacity = '1';
+            modalContent.style.transform = 'translateY(0)';
+          }, 10);
+        }
+      } catch (error) {
+        console.error("Error al mostrar modal:", error);
+        mostrarMensaje("No se pudo mostrar el selector de turnos", "error");
+      }
+    }
+
+    /**
+     * Cierra el modal con animación
+     */
+    function closeModal() {
+      try {
+        const modalContent = elementos.turnoModal.querySelector('div');
+        
+        if (modalContent) {
+          // Animar salida
+          modalContent.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+          modalContent.style.opacity = '0';
+          modalContent.style.transform = 'translateY(20px)';
+          
+          // Ocultar modal después de la animación
+          setTimeout(() => {
+            elementos.turnoModal.style.display = 'none';
+            
+            // Restablecer estilos para la próxima apertura
+            modalContent.style.transition = '';
+            modalContent.style.opacity = '';
+            modalContent.style.transform = '';
+          }, 200);
+        } else {
+          elementos.turnoModal.style.display = 'none';
+        }
+      } catch (error) {
+        console.error("Error al cerrar modal:", error);
+        
+        // En caso de error, forzar cierre sin animación
+        elementos.turnoModal.style.display = 'none';
+      }
+    }
+
+    /* ======== KEYPRESS HANDLERS ======== */
+    /**
+     * Manejador de eventos para teclas
+     */
+    function setupKeyboardEvents() {
+      try {
+        // Cerrar modal con tecla Escape
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && elementos.turnoModal.style.display === 'flex') {
+            closeModal();
+          }
+        });
+        
+        // Cerrar modal al hacer clic fuera del contenido
+        elementos.turnoModal.addEventListener('click', (e) => {
+          if (e.target === elementos.turnoModal) {
+            closeModal();
+          }
+        });
+      } catch (error) {
+        console.error("Error al configurar eventos de teclado:", error);
+      }
+    }
+
+    /* ======== FUNCIONES DE EXPORTACIÓN ======== */
+    /**
+     * Genera datos de secuencia para exportar/compartir
+     * @returns {object} Datos de la secuencia actual
+     */
+    function generarDatosExportacion() {
+      try {
+        // No exportar si no hay turnos
+        if (turnos.length === 0) {
+          return null;
+        }
+        
+        // Crear objeto con todos los datos necesarios
+        const datos = {
+          version: "2.0",
+          fecha: new Date().toISOString(),
+          turnos: turnos,
+          analisis: ultimoAnalisis,
+          deficits: deficitsDetallados,
+          compensaciones: document.querySelector('.compensation-option.selected') ? {
+            turnosRecomendados: JSON.parse(document.querySelector('.compensation-option.selected').dataset.turns || '[]'),
+            recuperacion: document.querySelector('.compensation-option.selected').dataset.recovery || '0:00'
+          } : null
+        };
+        
+        return datos;
+      } catch (error) {
+        console.error("Error al generar datos para exportación:", error);
+        mostrarMensaje("Error al generar datos para compartir", "error");
+        return null;
+      }
+    }
+
+    /**
+     * Importa una secuencia de turnos previamente guardada
+     * @param {object} datos - Datos de la secuencia a importar
+     * @returns {boolean} Si la importación fue exitosa
+     */
+    function importarSecuencia(datos) {
+      try {
+        // Validar formato de datos
+        if (!datos || !datos.version || !Array.isArray(datos.turnos) || datos.turnos.length === 0) {
+          throw new Error("Formato de datos inválido");
+        }
+        
+        // Validar tipos de turnos
+        if (!datos.turnos.every(turno => ['M', 'T', 'DD', 'FS'].includes(turno))) {
+          throw new Error("Secuencia contiene turnos no válidos");
+        }
+        
+        // Limpiar secuencia actual
+        turnos = [];
+        deficitsDetallados = [];
+        ultimoAnalisis = null;
+        
+        // Importar turnos
+        turnos = [...datos.turnos];
+        
+        // Renderizar y analizar
+        renderTurnos();
+        
+        if (turnos.length > 1) {
+          analyzeSequence();
+        } else {
+          hideResults();
+        }
+        
+        mostrarMensaje("Secuencia importada correctamente", "success");
+        return true;
+      } catch (error) {
+        console.error("Error al importar secuencia:", error);
+        mostrarMensaje(`Error al importar secuencia: ${error.message}`, "error");
+        return false;
+      }
+    }
+
+    /* ======== INICIALIZACIÓN ======== */
+    /**
+     * Initializa la aplicación
+     */
+    function init() {
+      try {
+        // Obtener referencias DOM actualizadas (por si hay cambios dinámicos)
+        elementos.turnoSequence = document.getElementById('turno-sequence');
+        elementos.turnoModal = document.getElementById('turnoModal');
+        elementos.resultsSection = document.getElementById('results');
+        elementos.recommendationsSection = document.getElementById('recommendations');
+        elementos.calendarSection = document.getElementById('calendar');
+        elementos.calendarView = document.getElementById('calendar-view');
+        elementos.infoMessages = document.getElementById('info-messages');
+        elementos.btnAddTurno = document.getElementById('add-turno');
+        elementos.btnClearTurnos = document.getElementById('clear-turnos');
+        elementos.deficitTotal = document.getElementById('deficit-total');
+        elementos.compensacionRequerida = document.getElementById('compensacion-requerida');
+        elementos.transicionesDeficitarias = document.getElementById('transiciones-deficitarias');
+        elementos.patternBox = document.getElementById('pattern-box');
+        elementos.patternName = document.getElementById('pattern-name');
+        elementos.patternDescription = document.getElementById('pattern-description');
+        elementos.recommendationText = document.getElementById('recommendation-text');
+        elementos.compensationOptions = document.getElementById('compensation-options');
+        
+        // Configurar eventos de teclado
+        setupKeyboardEvents();
+        
+        // Mensaje de bienvenida
+        mostrarMensaje("Bienvenido a la Calculadora de Descansos. Añade turnos para comenzar el análisis.", "info", 5000);
+        
+        // Comprobar si hay datos guardados en localStorage
+        try {
+          const datosGuardados = localStorage.getItem('calculadoraDescansos');
+          if (datosGuardados) {
+            const datos = JSON.parse(datosGuardados);
+            if (datos && Array.isArray(datos.turnos) && datos.turnos.length > 0) {
+              // Preguntar si desea cargar los datos guardados
+              const cargar = confirm("Se han encontrado datos guardados de una sesión anterior. ¿Desea cargarlos?");
+              if (cargar) {
+                importarSecuencia(datos);
+              } else {
+                localStorage.removeItem('calculadoraDescansos');
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Error al cargar datos guardados:", e);
+          localStorage.removeItem('calculadoraDescansos');
+        }
+        
+        // Ejemplo inicial (opcional - puedes comentar estas líneas para empezar con una secuencia vacía)
+        if (turnos.length === 0) {
+          addTurnoType('T');
+          addTurnoType('M');
+          addTurnoType('T');
+        }
+      } catch (error) {
+        console.error("Error en inicialización:", error);
+        alert("Ha ocurrido un error al inicializar la aplicación. Por favor, recarga la página.");
+      }
+    }
+
+    /**
+     * Guardar estado antes de cerrar/recargar página
+     */
+    function setupBeforeUnload() {
+      window.addEventListener('beforeunload', () => {
+        try {
+          // Solo guardar si hay turnos
+          if (turnos.length > 0) {
+            const datos = generarDatosExportacion();
+            if (datos) {
+              localStorage.setItem('calculadoraDescansos', JSON.stringify(datos));
+            }
+          }
+        } catch (e) {
+          console.error("Error al guardar estado:", e);
+        }
+      });
+    }
+
+    // Configurar evento antes de cerrar
+    setupBeforeUnload();
+    
+    // Inicializar la aplicación cuando se cargue el DOM
+    document.addEventListener('DOMContentLoaded', init);
+    
+    // Si el DOM ya está cargado, inicializar inmediatamente
+    if (document.readyState === 'interactive' || document.readyState === 'complete') {
+      init();
+    }
+  </script>
+</body>
+</html>
