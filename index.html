@@ -35,6 +35,12 @@ Queda terminantemente prohibido sin autorización expresa y por escrito del auto
 - Comercializar, vender, licenciar o sublicenciar
 - Transferir o ceder a terceros cualquier derecho sobre el software
 
+LIMITACIÓN DE RESPONSABILIDAD:
+Este software se proporciona "tal cual" sin garantías de ningún tipo, ya sean
+expresas o implícitas. El autor no asume responsabilidad alguna por daños
+directos, indirectos, incidentales, especiales o consecuentes que pudieran
+derivarse del uso o imposibilidad de uso de este software.
+
 La violación de cualquiera de las condiciones establecidas en este aviso legal
 dará lugar a las acciones legales que correspondan conforme a la legislación
 aplicable en materia de propiedad intelectual.
@@ -1025,7 +1031,7 @@ MODIFICADO NI OCULTADO BAJO NINGUNA CIRCUNSTANCIA.
     
     .tabla-editable td {
       padding: 6px 2px;
-      border-right: 1px solid #e0e0e0;
+      border: 1px solid #e0e0e0;
       min-height: 24px;
       cursor: text;
       font-size: 9px;
@@ -1064,36 +1070,56 @@ MODIFICADO NI OCULTADO BAJO NINGUNA CIRCUNSTANCIA.
       background-color: #fff9e6;
     }
     
-    /* Marcado de déficits */
+    /* Marcado de déficits - BLOQUES VISUALMENTE UNIDOS CON TRANSPARENCIA */
     .tabla-editable td.deficit {
-      background: #ffebee;
+      background: rgba(244, 67, 54, 0.35);
       color: #c62828;
       font-weight: 700;
-      border: 2px solid #ef5350 !important;
+      border: 4px solid #ef5350 !important;
+      box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2), 0 2px 6px rgba(183, 28, 28, 0.25);
       position: relative;
       cursor: help;
       transition: all 0.2s ease;
     }
     
+    /* Clase para marcar el inicio de un bloque de déficit */
+    .tabla-editable td.deficit-bloque-inicio + td.deficit-bloque-fin {
+      border-left: none !important;
+    }
+    
+    .tabla-editable td.deficit-bloque-inicio:has(+ td.deficit-bloque-fin) {
+      border-right: none !important;
+    }
+    
     .tabla-editable td.deficit:hover {
-      background: #ffcdd2;
-      box-shadow: 0 2px 8px rgba(239, 83, 80, 0.3);
+      background: rgba(244, 67, 54, 0.5);
+      box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.3), 0 3px 8px rgba(183, 28, 28, 0.35);
       transform: scale(1.05);
       z-index: 100;
     }
     
     .tabla-editable td.compensado {
-      background: #fff9e6;
-      color: #f57f17;
+      background: rgba(229, 115, 115, 0.35);
+      color: #d32f2f;
       font-weight: 600;
-      border: 1px solid #fdd835;
+      border: 3px solid #e57373;
+      box-shadow: 0 0 0 1px rgba(229, 115, 115, 0.2), 0 1px 4px rgba(198, 40, 40, 0.2);
       cursor: help;
       transition: all 0.2s ease;
     }
     
+    /* Clase para marcar el inicio de un bloque de compensado */
+    .tabla-editable td.compensado-bloque-inicio + td.compensado-bloque-fin {
+      border-left: none !important;
+    }
+    
+    .tabla-editable td.compensado-bloque-inicio:has(+ td.compensado-bloque-fin) {
+      border-right: none !important;
+    }
+    
     .tabla-editable td.compensado:hover {
-      background: #fff9c4;
-      box-shadow: 0 2px 6px rgba(255, 235, 59, 0.3);
+      background: rgba(229, 115, 115, 0.5);
+      box-shadow: 0 0 0 1px rgba(229, 115, 115, 0.3), 0 2px 6px rgba(198, 40, 40, 0.3);
       transform: scale(1.05);
       z-index: 100;
     }
@@ -1101,6 +1127,19 @@ MODIFICADO NI OCULTADO BAJO NINGUNA CIRCUNSTANCIA.
     .tabla-editable td.ok {
       background: #f5f5f5;
       color: #666;
+    }
+    
+    .tabla-editable td.fs-dia {
+      background: transparent;
+      color: #9575CD;
+      font-weight: 600;
+      border: none;
+    }
+    
+    .tabla-editable td.fs-dia:hover {
+      color: #7E57C2;
+      transform: scale(1.05);
+      z-index: 100;
     }
     
     /* Flecha sutil entre transiciones con déficit */
@@ -1122,14 +1161,14 @@ MODIFICADO NI OCULTADO BAJO NINGUNA CIRCUNSTANCIA.
     
     .flecha-deficit::before {
       content: '→';
-      color: #ef5350;
+      color: #c62828;
       font-size: 12px;
       font-weight: bold;
       line-height: 1;
     }
     
     .flecha-deficit.compensado::before {
-      color: #fdd835;
+      color: #ef5350;
     }
     
     /* Tooltip flotante para información de descanso */
@@ -1169,19 +1208,20 @@ MODIFICADO NI OCULTADO BAJO NINGUNA CIRCUNSTANCIA.
     }
     
     .tooltip-descanso.deficit {
-      background: #d32f2f;
+      background: #c62828;
+      box-shadow: 0 2px 8px rgba(198, 40, 40, 0.5);
     }
     
     .tooltip-descanso.deficit::after {
-      border-top-color: #d32f2f;
+      border-top-color: #c62828;
     }
     
     .tooltip-descanso.compensado {
-      background: #f57f17;
+      background: #ef5350;
     }
     
     .tooltip-descanso.compensado::after {
-      border-top-color: #f57f17;
+      border-top-color: #ef5350;
     }
     
     .tooltip-linea {
@@ -1488,7 +1528,7 @@ MODIFICADO NI OCULTADO BAJO NINGUNA CIRCUNSTANCIA.
     <!-- Pestañas -->
     <div class="tabs">
       <div class="tab active" data-tab="calculadora">Calculadora</div>
-      <div class="tab" data-tab="comprobacion">Comprovació d'Horaris</div>
+      <div class="tab" data-tab="comprobacion">Comprovació d'horaris</div>
     </div>
 
     <!-- CALCULADORA -->
@@ -1519,11 +1559,11 @@ MODIFICADO NI OCULTADO BAJO NINGUNA CIRCUNSTANCIA.
       <!-- Resultados -->
       <div class="results-container" id="results" style="display: none;">
         <div class="results-header">
-          <div class="results-title">Anàlisi de Descansos</div>
+          <div class="results-title">Anàlisi de descansos</div>
         </div>
         <div class="pattern-box pattern-double" id="pattern-box">
           <div class="pattern-title">
-            <i class="fas fa-exclamation-triangle"></i> <strong>Patró Detectat:</strong> <span id="pattern-name">Dèficit Doble</span>
+            <i class="fas fa-exclamation-triangle"></i> <strong>Patró Detectat:</strong> <span id="pattern-name">Dèficit doble</span>
           </div>
           <p id="pattern-description"></p>
         </div>
@@ -1546,7 +1586,7 @@ MODIFICADO NI OCULTADO BAJO NINGUNA CIRCUNSTANCIA.
       <!-- Recomendaciones -->
       <div class="recommendation-box" id="recommendations" style="display: none;">
         <div class="recommendation-title">
-          <i class="fas fa-lightbulb"></i> Recomanacions de Compensació
+          <i class="fas fa-lightbulb"></i> Recomanacions de compensació
         </div>
         <p id="recommendation-text"></p>
         <div class="compensation-options" id="compensation-options">
@@ -1557,7 +1597,7 @@ MODIFICADO NI OCULTADO BAJO NINGUNA CIRCUNSTANCIA.
       <!-- Calendario Adaptado -->
       <div class="calendar-container" id="calendar" style="display: none;">
         <div class="calendar-header">
-          <div class="calendar-title">Horari Adaptat amb Compensació</div>
+          <div class="calendar-title">Horari adaptat amb compensació</div>
         </div>
         <div class="calendar-view" id="calendar-view">
           <!-- Se muestra la secuencia original + recomendación o mensaje -->
@@ -1582,7 +1622,7 @@ MODIFICADO NI OCULTADO BAJO NINGUNA CIRCUNSTANCIA.
             <li>Els torns amb <span style="color: var(--color-warning); font-weight: bold;">dèficit</span> es marcaran en vermell</li>
           </ol>
           <div style="margin-top: 6px; padding: 6px; background: #fff3cd; border-radius: 4px; font-size: 10px;">
-            <strong>Format:</strong> Treballador + D1...D31 | Nom + torns (M, T, DD, FS)
+            <strong>Format:</strong> Nom + D1...D31 (editable) | Treballador + torns (M, T, DD, FS)
           </div>
           <div style="margin-top: 6px; padding: 6px; background: #e3f2fd; border-radius: 4px; font-size: 10px; border-left: 3px solid #2196f3;">
             <strong>💡 Consell:</strong> Utilitza <kbd style="background: white; padding: 2px 5px; border-radius: 3px; border: 1px solid #ccc;">Ctrl+Z</kbd> per desfer i <kbd style="background: white; padding: 2px 5px; border-radius: 3px; border: 1px solid #ccc;">Ctrl+Y</kbd> per refer els canvis a la taula
@@ -1612,7 +1652,7 @@ MODIFICADO NI OCULTADO BAJO NINGUNA CIRCUNSTANCIA.
           <table id="tabla-horarios" class="tabla-editable">
             <thead>
               <tr>
-                <th contenteditable="true">Treballador</th>
+                <th contenteditable="true">Nom</th>
                 <th contenteditable="true">D1</th>
                 <th contenteditable="true">D2</th>
                 <th contenteditable="true">D3</th>
@@ -2106,6 +2146,10 @@ function mostrarMensaje(mensaje, tipo = 'info', duracion = 5000) {
           return;
         }
         
+        // Calcular déficits y compensaciones para toda la secuencia
+        const analisisCompleto = calcularDeficitConCompensacion(turnos);
+        const deficitsOriginales = analisisCompleto.deficitsOriginales || [];
+        
         // Renderizar cada turno
         turnos.forEach((turno, index) => {
           // Crear contenedor de turno
@@ -2192,6 +2236,65 @@ function mostrarMensaje(mensaje, tipo = 'info', duracion = 5000) {
                 const ok = document.createElement('div');
                 ok.className = 'descanso-ok';
                 ok.innerHTML = '<i class="fas fa-check-circle"></i> <strong>Compleix descans</strong>';
+                
+                // Verificar si este descanso está compensando algún déficit anterior
+                const exceso = descansoMinutos - config.descansoReglamentario;
+                if (exceso > 0) {
+                  // Buscar TODOS los déficits que este descanso está ayudando a compensar
+                  const deficitsQueCompensa = deficitsOriginales.filter(d => 
+                    d.compensadoPor && 
+                    d.compensadoPor.some(cp => cp.indice === index && !cp.incluyeFS)
+                  );
+                  
+                  if (deficitsQueCompensa.length > 0) {
+                    // Calcular totales
+                    let totalCompensado = 0;
+                    let totalDeficitOriginal = 0;
+                    let hayCompensacionParcial = false;
+                    
+                    deficitsQueCompensa.forEach(deficit => {
+                      const cantidadDeEsteDescanso = deficit.compensadoPor
+                        .filter(cp => cp.indice === index)
+                        .reduce((sum, cp) => sum + cp.cantidad, 0);
+                      
+                      totalCompensado += cantidadDeEsteDescanso;
+                      totalDeficitOriginal += deficit.deficitOriginal;
+                      
+                      if (!deficit.compensado) {
+                        hayCompensacionParcial = true;
+                      }
+                    });
+                    
+                    // Crear UN SOLO mensaje
+                    const notaCompensacion = document.createElement('div');
+                    notaCompensacion.style.fontSize = '10px';
+                    notaCompensacion.style.marginTop = '4px';
+                    notaCompensacion.style.fontWeight = '500';
+                    notaCompensacion.style.padding = '4px 8px';
+                    notaCompensacion.style.borderRadius = '4px';
+                    
+                    const numDeficits = deficitsQueCompensa.length;
+                    const textoDeficits = numDeficits === 1 ? 'dèficit anterior' : `${numDeficits} dèficits anteriors`;
+                    
+                    if (hayCompensacionParcial) {
+                      // COMPENSACIÓN PARCIAL - NARANJA
+                      const diferencia = totalDeficitOriginal - totalCompensado;
+                      notaCompensacion.style.color = '#e65100';
+                      notaCompensacion.style.backgroundColor = '#fff3e0';
+                      notaCompensacion.style.borderLeft = '3px solid #ff9800';
+                      notaCompensacion.innerHTML = `<i class="fas fa-exclamation-circle"></i> Compensa parcialment ${textoDeficits} (${formatDuration(totalCompensado)} de ${formatDuration(totalDeficitOriginal)}, queden ${formatDuration(diferencia)})`;
+                    } else {
+                      // COMPENSACIÓN TOTAL - AZUL
+                      notaCompensacion.style.color = '#1976d2';
+                      notaCompensacion.style.backgroundColor = '#e3f2fd';
+                      notaCompensacion.style.borderLeft = '3px solid #1976d2';
+                      notaCompensacion.innerHTML = `<i class="fas fa-check-circle"></i> Compensa ${textoDeficits} (${formatDuration(totalCompensado)})`;
+                    }
+                    
+                    ok.appendChild(notaCompensacion);
+                  }
+                }
+                
                 descansoIndicator.appendChild(ok);
               }
               
@@ -2287,7 +2390,8 @@ function calcularDeficitConCompensacion(schedule) {
     }
 
     // GUARDAR UNA COPIA DE LOS DÉFICITS ORIGINALES ANTES DE COMPENSAR
-    const deficitsOriginalesSinModificar = deficits.map(d => ({...d}));
+    // Esta copia se actualiza al final con información de compensación
+    const deficitsOriginalesSinModificar = deficits.map(d => ({...d, compensadoPor: []}));
     
     // 2. Usar los excesos para compensar déficits previos
     for (let d = 0; d < deficits.length; d++) {
@@ -2306,6 +2410,15 @@ function calcularDeficitConCompensacion(schedule) {
             // Aplicar compensación
             def.deficit -= compensacionPosible;
             def.compensacionAplicada = (def.compensacionAplicada || 0) + compensacionPosible;
+            
+            // Registrar qué índices están compensando este déficit
+            if (!def.compensadoPor) {
+              def.compensadoPor = [];
+            }
+            def.compensadoPor.push({
+              indice: exc.indice,
+              cantidad: compensacionPosible
+            });
             
             // Reducir el exceso disponible
             exc.exceso -= compensacionPosible;
@@ -2365,6 +2478,16 @@ function calcularDeficitConCompensacion(schedule) {
               def.deficit -= compensacion;
               def.compensacionAplicada = (def.compensacionAplicada || 0) + compensacion;
               
+              // Registrar que esta compensación viene de un período con FS
+              if (!def.compensadoPor) {
+                def.compensadoPor = [];
+              }
+              def.compensadoPor.push({
+                indice: j, // índice donde está el FS
+                cantidad: compensacion,
+                incluyeFS: true
+              });
+              
               if (def.deficit <= 0) {
                 def.deficit = 0;
                 def.compensado = true;
@@ -2376,13 +2499,23 @@ function calcularDeficitConCompensacion(schedule) {
       }
     }
 
+    // Actualizar la copia de déficits originales con información de compensación
+    for (let i = 0; i < deficits.length; i++) {
+      // Copiar información de compensación tanto si está totalmente compensado como parcialmente
+      if (deficits[i].compensadoPor && deficits[i].compensadoPor.length > 0) {
+        deficitsOriginalesSinModificar[i].compensadoPor = deficits[i].compensadoPor;
+        deficitsOriginalesSinModificar[i].compensacionAplicada = deficits[i].compensacionAplicada;
+        deficitsOriginalesSinModificar[i].compensado = deficits[i].compensado; // true si total, false si parcial
+      }
+    }
+    
     // Calcular déficit neto total (solo de los no compensados)
     const deficitsFiltrados = deficits.filter(d => d.deficit > 0);
     const netDeficit = deficitsFiltrados.reduce((sum, d) => sum + d.deficit, 0);
     
     return { 
       deficits: deficitsFiltrados, 
-      deficitsOriginales: deficitsOriginalesSinModificar, // Usar la copia sin modificar
+      deficitsOriginales: deficitsOriginalesSinModificar, // Usar la copia actualizada con info de compensación
       netDeficit 
     };
   } catch (error) {
@@ -2592,7 +2725,7 @@ function calcularDeficitConCompensacion(schedule) {
             break;
           case 'simple':
             patternBox.classList.add('pattern-simple');
-            patternTitle.innerHTML = `<i class="fas ${pattern.icon}"></i> <strong>Patró Detectat:</strong> <span id="pattern-name">${pattern.description}</span>`;
+            patternTitle.innerHTML = `<i class="fas ${pattern.icon}"></i> <strong>Patró detectat:</strong> <span id="pattern-name">${pattern.description}</span>`;
             patternNameSpan.textContent = pattern.description;
             patternDescription.innerHTML = `${pattern.details}<br>Dèficit net: ${formatDuration(netDeficit)} hores.`;
             break;
@@ -3410,6 +3543,7 @@ function calcularDeficitConCompensacion(schedule) {
     // Variables globales del módulo
     let datosTabla = []; // Almacena los datos parseados de la tabla
     let resultadosAnalisis = []; // Resultados del análisis por trabajador
+    let encabezadosPersonalizados = []; // Encabezados personalizados de la tabla
     
     // Sistema de deshacer/rehacer
     let historialCambios = []; // Stack de estados previos
@@ -3706,9 +3840,11 @@ function calcularDeficitConCompensacion(schedule) {
               
               // Aplicar estilos según las clases
               if (td.classList.contains('deficit')) {
-                estilo += ' background-color: #ffebee; color: #c62828; font-weight: bold; border: 2px solid #ef5350;';
+                estilo += ' background-color: rgba(244, 67, 54, 0.35); color: #c62828; font-weight: bold; border: 4px solid #ef5350; box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2), 0 2px 6px rgba(183, 28, 28, 0.25);';
               } else if (td.classList.contains('compensado')) {
-                estilo += ' background-color: #fff9e6; color: #f57f17; font-weight: 600; border: 1px solid #fdd835;';
+                estilo += ' background-color: rgba(229, 115, 115, 0.35); color: #d32f2f; font-weight: 600; border: 3px solid #e57373; box-shadow: 0 0 0 1px rgba(229, 115, 115, 0.2), 0 1px 4px rgba(198, 40, 40, 0.2);';
+              } else if (td.classList.contains('fs-dia')) {
+                estilo += ' background: transparent; color: #9575CD; font-weight: 600;';
               }
               
               html += `<td style="${estilo}">${texto}</td>`;
@@ -3821,15 +3957,20 @@ function calcularDeficitConCompensacion(schedule) {
           }
         });
         
-        // Headers de días (D1, D2, D3...)
+        // Headers de días (usar encabezados personalizados si existen)
         turnos.forEach((turno, idx) => {
           const diaNum = idx + 1;
           const tieneDeficit = columnasConDeficit.has(idx);
           const bgColor = tieneDeficit ? '#c62828' : '#0078d4';
           const icon = tieneDeficit ? '⚠️' : '';
           
+          // Usar encabezado personalizado si existe, sino usar D1, D2, etc.
+          const etiquetaDia = (encabezadosPersonalizados && encabezadosPersonalizados[idx + 1]) 
+            ? encabezadosPersonalizados[idx + 1] 
+            : `D${diaNum}`;
+          
           html += `<th style="padding: 6px; background-color: ${bgColor}; color: white; font-weight: bold; text-align: center; min-width: 45px;">
-            ${icon} D${diaNum}
+            ${icon} ${etiquetaDia}
           </th>`;
         });
         
@@ -3847,14 +3988,25 @@ function calcularDeficitConCompensacion(schedule) {
           let bgColor = 'white';
           let textColor = '#333';
           let borderColor = '#ddd';
+          let estiloExtra = '';
           
-          if (tieneDeficit) {
-            bgColor = '#ffebee';
-            textColor = '#c62828';
-            borderColor = '#ef5350';
+          // Primero verificar si es FS
+          if (turno === 'FS') {
+            bgColor = 'transparent';
+            textColor = '#9575CD';
+            borderColor = '#ddd';
+            estiloExtra = '';
           }
           
-          html += `<td style="background-color: ${bgColor}; color: ${textColor}; font-weight: bold; text-align: center; padding: 6px; border: 2px solid ${borderColor};">
+          // Luego, si tiene déficit, sobreescribir
+          if (tieneDeficit) {
+            bgColor = 'rgba(244, 67, 54, 0.35)';
+            textColor = '#c62828';
+            borderColor = '#ef5350';
+            estiloExtra = 'box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2), 0 2px 6px rgba(183, 28, 28, 0.25);';
+          }
+          
+          html += `<td style="${estiloExtra} background-color: ${bgColor}; color: ${textColor}; font-weight: bold; text-align: center; padding: 6px; border: ${tieneDeficit ? '4px' : '2px'} solid ${borderColor};">
             ${turno}
           </td>`;
         });
@@ -3942,17 +4094,25 @@ function calcularDeficitConCompensacion(schedule) {
             const { indice, turnoActual, turnoSiguiente, deficitOriginal, deficit: deficitMinutos, compensado, descansoActual } = deficit;
             const deficitAMostrar = deficitOriginal || deficitMinutos;
             const estadoTexto = compensado ? '✅ Compensat' : '❌ Pendent';
-            const estadoColor = compensado ? '#f57f17' : '#c62828';
-            const estadoBg = compensado ? '#fff9e6' : '#ffebee';
+            const estadoColor = compensado ? 'white' : 'white';
+            const estadoBg = compensado ? '#ef5350' : '#f44336';
             
             const diaInicio = indice + 1; // Día donde empieza el turno
             const diaFinal = indice + 2;  // Día del siguiente turno
             
+            // Usar encabezados personalizados si existen
+            const etiquetaDiaInicio = (encabezadosPersonalizados && encabezadosPersonalizados[diaInicio]) 
+              ? encabezadosPersonalizados[diaInicio] 
+              : `D${diaInicio}`;
+            const etiquetaDiaFinal = (encabezadosPersonalizados && encabezadosPersonalizados[diaFinal]) 
+              ? encabezadosPersonalizados[diaFinal] 
+              : `D${diaFinal}`;
+            
             html += `
-              <tr style="background-color: ${compensado ? '#fffef7' : '#fff5f5'};">
+              <tr style="background-color: ${compensado ? '#ffebee' : '#fff5f5'};">
                 <td style="text-align: center; font-weight: bold; background-color: #f8f9fa; font-size: 12px;">${idx + 1}</td>
                 <td style="text-align: center; font-weight: bold; background-color: #ffebee; color: #c62828; font-size: 12px;">
-                  D${diaInicio}
+                  ${etiquetaDiaInicio}
                 </td>
                 <td style="text-align: center; font-weight: bold; font-size: 14px; color: #c62828;">
                   ${turnoActual}
@@ -3961,7 +4121,7 @@ function calcularDeficitConCompensacion(schedule) {
                   →
                 </td>
                 <td style="text-align: center; font-weight: bold; background-color: #ffebee; color: #c62828; font-size: 12px;">
-                  D${diaFinal}
+                  ${etiquetaDiaFinal}
                 </td>
                 <td style="text-align: center; font-weight: bold; font-size: 14px; color: #c62828;">
                   ${turnoSiguiente}
@@ -4101,11 +4261,30 @@ function calcularDeficitConCompensacion(schedule) {
           return;
         }
         
+        // Verificar si la primera fila es encabezado
+        const primeraFilaEsEncabezado = filas[0][0].toLowerCase().includes('treballador') || 
+                                         filas[0][0].toLowerCase().includes('nom') ||
+                                         filas[0][0].toLowerCase().match(/^d\d+$/) || // D1, D2, etc.
+                                         filas[0].length > 5; // Si tiene muchas columnas, probablemente sea encabezado
+        
+        // Si la primera fila es encabezado, actualizar los encabezados de la tabla
+        let inicioFilas = 0;
+        if (primeraFilaEsEncabezado) {
+          inicioFilas = 1;
+          // Actualizar encabezados en la tabla
+          const thead = document.querySelector('#tabla-horarios thead tr');
+          if (thead) {
+            const ths = thead.querySelectorAll('th');
+            filas[0].forEach((encabezado, idx) => {
+              if (idx < ths.length && encabezado) {
+                ths[idx].textContent = encabezado;
+              }
+            });
+          }
+        }
+        
         // Limpiar tabla actual
         elementosCheck.tablaBody.innerHTML = '';
-        
-        // Añadir filas (saltando la primera si es encabezado)
-        const inicioFilas = filas[0][0].toLowerCase().includes('treballador') ? 1 : 0;
         
         for (let i = inicioFilas; i < filas.length; i++) {
           const fila = filas[i];
@@ -4207,6 +4386,29 @@ function calcularDeficitConCompensacion(schedule) {
     }
 
     /**
+     * Captura los encabezados personalizados de la tabla
+     */
+    function capturarEncabezadosTabla() {
+      try {
+        const thead = document.querySelector('#tabla-horarios thead tr');
+        const encabezados = [];
+        
+        if (thead) {
+          const ths = thead.querySelectorAll('th');
+          ths.forEach((th, index) => {
+            const texto = th.textContent.trim();
+            encabezados.push(texto || (index === 0 ? 'Nom' : `D${index}`));
+          });
+        }
+        
+        return encabezados;
+      } catch (error) {
+        console.error('Error al capturar encabezados:', error);
+        return [];
+      }
+    }
+    
+    /**
      * Parsea los datos de la tabla
      */
     function parsearDatosTabla() {
@@ -4256,6 +4458,9 @@ function calcularDeficitConCompensacion(schedule) {
      */
     function analizarHorarios() {
       try {
+        // Capturar encabezados personalizados
+        encabezadosPersonalizados = capturarEncabezadosTabla();
+        
         // Limpiar marcas anteriores
         limpiarMarcasTabla();
         
@@ -4375,21 +4580,39 @@ function calcularDeficitConCompensacion(schedule) {
             mapaDeficits[d.indice] = d;
           });
           
-          // Marcar déficits en las celdas
+          // PRIMERO: Marcar todas las celdas FS con estilo especial
+          turnos.forEach((turno, idx) => {
+            if (turno === 'FS' && celdas[idx + 1]) {
+              celdas[idx + 1].classList.add('fs-dia');
+            }
+          });
+          
+          // DESPUÉS: Marcar déficits en las celdas (pueden sobreescribir FS si hay déficit)
           resultado.posicionesDeficit.forEach(posDeficit => {
             const { desde, hasta, compensado } = posDeficit;
             
-            // Marcar celda "desde"
+            // Marcar celda "desde" (inicio del bloque)
             if (celdas[desde + 1]) {
               if (compensado) {
                 celdas[desde + 1].classList.add('compensado');
+                celdas[desde + 1].classList.add('compensado-bloque-inicio');
               } else {
                 celdas[desde + 1].classList.add('deficit');
+                celdas[desde + 1].classList.add('deficit-bloque-inicio');
               }
             }
             
-            // Marcar celda "hasta"
-            if (celdas[hasta + 1]) {
+            // Marcar celda "hasta" (fin del bloque) - solo si es consecutiva
+            if (celdas[hasta + 1] && hasta === desde + 1) {
+              if (compensado) {
+                celdas[hasta + 1].classList.add('compensado');
+                celdas[hasta + 1].classList.add('compensado-bloque-fin');
+              } else {
+                celdas[hasta + 1].classList.add('deficit');
+                celdas[hasta + 1].classList.add('deficit-bloque-fin');
+              }
+            } else if (celdas[hasta + 1]) {
+              // Si no son consecutivas, marcar sin formar bloque
               if (compensado) {
                 celdas[hasta + 1].classList.add('compensado');
               } else {
@@ -4681,7 +4904,7 @@ function calcularDeficitConCompensacion(schedule) {
             
             deficits.forEach((deficit, idx) => {
               const { turnoActual, turnoSiguiente, deficitOriginal, deficit: deficitMinutos, compensado, descansoActual } = deficit;
-              const textoCompensado = compensado ? ' <span style="color: #f57f17;">(Compensat)</span>' : '';
+              const textoCompensado = compensado ? ' <span style="color: #ef5350;">(Compensat)</span>' : '';
               
               // Usar siempre el déficit ORIGINAL, no el modificado por compensación
               const deficitAMostrar = deficitOriginal || deficitMinutos;
